@@ -5,20 +5,10 @@
 """
 
 import socket, sys
-import struct
 
-# use the hex values like in the standard
-# https://en.wikipedia.org/wiki/EtherType#Values
-ETHERTYPES = {
-    # TODO - add in the rest
-    0x0800: "IPv4",
-    0x0806: "ARP",
-    0x86DD: "IPv6"
-}
-
-def format_mac(data):
-    # 02 = pad with 0's till 2 chars, X = uppercase hex
-    return ":".join(format(b, '02X') for b in data)
+from classes.EthernetFrame import EthernetFrame
+from classes.constants.EtherTypes import *
+from classes.utils.Formatters import *
 
 # create the actual socket connection and bind to an interface
 try:
@@ -31,6 +21,7 @@ try:
     s = socket.socket(socket.AF_PACKET, socket.SOCK_RAW, socket.ntohs(0x0003))
 
     # bind to a specific interface
+    # TODO - handle diff interfaces
     s.bind(("eth0", 0))
 except socket.error as error:
     print(
@@ -47,17 +38,12 @@ while True:
     except KeyboardInterrupt as error:
         sys.exit()
 
-    # TODO - move to own function
-    # 14 = dest mac (6), src mac (6), ethertype/len (2)
-    frame_header_len = 14
-    frame_header = struct.unpack("!6s6sH", unprocessed_data[:frame_header_len])
-    src_mac, dest_mac, ethertype = frame_header
+    frame = EthernetFrame(unprocessed_data)
+    print(frame)
 
-    # handle some nice formatting in the output plus descriptions
-    ethertype_formatted = hex(ethertype)
-    if ethertype in ETHERTYPES:
-        ethertype_formatted = ethertype_formatted + ":" + ETHERTYPES[ethertype]
-
-    print(f"| Frame > DestinationMAC=[{format_mac(dest_mac)}], ", 
-          f"SourceMAC=[{format_mac(src_mac)}], ", 
-          f"EtherType=[{ethertype_formatted}] |")
+    # check if it's a ETHER type we can process
+    if frame.ETHER_TYPE in ETHER_TYPES:
+      
+      # IPv4
+      if frame.ETHER_TYPE == ETHER_TYPES_REVERSED["IPv4"]:
+        print_green(f"\\_ IPv4 > ")
