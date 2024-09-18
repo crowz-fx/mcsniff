@@ -1,3 +1,5 @@
+# https://en.wikipedia.org/wiki/Ethernet_frame#Structure
+
 import struct
 
 from classes.constants.EtherTypes import ETHER_TYPES
@@ -9,9 +11,9 @@ class EthernetFrame:
     FRAME_HEADER_LEN = 14
 
     def __init__(self, data) -> None:
-        self.frame_header, self.payload = self.process_frame(data)
-        self.DEST_MAC, self.SRC_MAC, self.ETHER_TYPE = self.frame_header
-        self.PAYLOAD_LEN = len(self.payload)
+        self.FRAME_HEADER, self.PAYLOAD = self.process_frame(data)
+        self.DEST_MAC, self.SRC_MAC, self.ETHER_TYPE = self.FRAME_HEADER
+        self.PAYLOAD_LEN = len(self.PAYLOAD)
 
     def process_frame(self, data):
         return (
@@ -32,7 +34,7 @@ class EthernetFrame:
             )
 
         return (
-            f"| Frame > "
+            f"|  Frame > "
             + f"SourceMAC=[{format_mac(self.SRC_MAC)}], "
             + f"DestinationMAC=[{format_mac(self.DEST_MAC)}], "
             + f"EtherType=[{ethertype_formatted}] |"

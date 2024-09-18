@@ -11,8 +11,12 @@ I know, I know, I can just use scapy or use WireShark and dig into them, but whe
 2. For a deep dive into ethernet frames, see [this great resource](https://www.freecodecamp.org/news/the-complete-guide-to-the-ethernet-protocol/)
 
 ## Features and functionality
-1. Ethernet frame processing
-2. ...?
+Broken down into the OSI model layers, this tool can process/dump/inspect the following:
+### L2
+* Ethernet frame(s)
+
+### L3
+* IPv4 packet(s)
 
 ## Run
 ```bash
@@ -27,8 +31,10 @@ while true; clear; echo 'Running...'; do sudo timeout 20 python McSniff.py; echo
 ## Further reading/docs
 1. [Python struct formatting](https://docs.python.org/3/library/struct.html#format-characters)
 2. [Python socket docs](https://docs.python.org/3/library/socket.html)
-3. [Ethernet Frame Wiki](https://en.wikipedia.org/wiki/Ethernet_frame)
+3. [Ethernet frame Wiki](https://en.wikipedia.org/wiki/Ethernet_frame)
 4. [EtherType Wiki](https://en.wikipedia.org/wiki/EtherType)
+5. [IPv4 packet structure Wiki](https://en.wikipedia.org/wiki/IPv4#Packet_structure)
+6. [IP protocol numbers Wiki](https://en.wikipedia.org/wiki/List_of_IP_protocol_numbers)
 
 
 ## Example from scapy

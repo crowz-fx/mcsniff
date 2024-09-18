@@ -8,6 +8,7 @@ import socket, sys, signal, os
 
 from classes.EthernetFrame import EthernetFrame
 from classes.constants.EtherTypes import *
+from classes.protocols.IPv4 import IPv4
 from classes.utils.Formatters import *
 
 
@@ -79,4 +80,5 @@ while True:
 
         # IPv4
         if frame.ETHER_TYPE == ETHER_TYPES_REVERSED["IPv4"]:
-            print_green(f"\\_ IPv4 > ")
+            print_green(f"{IPv4(frame.PAYLOAD)}")
+

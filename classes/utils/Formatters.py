@@ -6,6 +6,11 @@ def format_mac(data):
     return ":".join(format(b, "02X") for b in data)
 
 
+def format_ipv4(data):
+    # d = decimal
+    return ".".join(format(b, "d") for b in data)
+
+
 def print_green(output):
     print(GREEN, output, END, sep="")
 
