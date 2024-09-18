@@ -32,7 +32,8 @@ class EthernetFrame:
             )
 
         return (
-            f"| Frame > DestinationMAC=[{format_mac(self.DEST_MAC)}], "
+            f"| Frame > "
             + f"SourceMAC=[{format_mac(self.SRC_MAC)}], "
+            + f"DestinationMAC=[{format_mac(self.DEST_MAC)}], "
             + f"EtherType=[{ethertype_formatted}] |"
         )
