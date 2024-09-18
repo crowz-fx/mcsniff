@@ -3,4 +3,5 @@
 
 GREEN = "\33[32m"
 YELLOW = "\33[33m"
+BLUE = "\33[34m"
 END = "\033[0m"

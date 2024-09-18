@@ -1,5 +1,5 @@
-# mcsniff
-packet sniffer and interpreter... you know for research purposes
+# McSniff
+Packet sniffer and interpreter... you know for research purposes
 
 ### Reasoning
 I wanted to literally dig into the payloads, frames, packets etc. of what's actually going back and forth over a network. Understanding the breakdown of the structure, byte-for-byte was a good learning experience. 
@@ -23,6 +23,13 @@ sudo python McSniff.py
 ```bash
 while true; clear; echo 'Running...'; do sudo timeout 20 python McSniff.py; echo 'Sleeping...'; sleep 5; done
 ```
+
+## Further reading/docs
+1. [Python struct formatting](https://docs.python.org/3/library/struct.html#format-characters)
+2. [Python socket docs](https://docs.python.org/3/library/socket.html)
+3. [Ethernet Frame Wiki](https://en.wikipedia.org/wiki/Ethernet_frame)
+4. [EtherType Wiki](https://en.wikipedia.org/wiki/EtherType)
+
 
 ## Example from scapy
 ```python

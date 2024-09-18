@@ -12,3 +12,7 @@ def print_green(output):
 
 def print_yellow(output):
     print(YELLOW, output, END, sep="")
+
+
+def print_blue(output):
+    print(BLUE, output, END, sep="")
