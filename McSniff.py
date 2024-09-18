@@ -4,11 +4,29 @@
 
 """
 
-import socket, sys
+import socket, sys, signal, os
 
 from classes.EthernetFrame import EthernetFrame
 from classes.constants.EtherTypes import *
 from classes.utils.Formatters import *
+
+# easy way to manage 'all the things to do when quitting'
+def do_exit(exit_code=0):
+    print_yellow("[X] Stopping McSniff!")
+    sys.exit(exit_code)
+
+# when we get a signal, handle accordingly
+def exit_handler(signum, frame):
+    print_yellow(f"[+] Handling SIGNAL=[{signal.Signals(signum).name}]...")
+    
+    # TODO - maybe consume and ignore some like SIGSTP?
+    do_exit()
+
+# capture ctrl+c (SIGINT)
+signal.signal(signal.SIGINT, exit_handler)
+# nice graceful kill -15's 
+signal.signal(signal.SIGTERM, exit_handler)
+
 print_yellow("[+] Starting McSniff...")
 
 # create the actual socket connection and bind to an interface
@@ -28,7 +46,7 @@ except socket.error as error:
     print(
         f"Failed to create socket connection, error=[{str(error.errno)}], message=[{error.strerror}]"
     )
-    sys.exit()
+    do_exit(1)
 
 # loop and process each packet recieved
 while True:
@@ -37,7 +55,9 @@ while True:
     try:
         unprocessed_data, address = s.recvfrom(65565)
     except KeyboardInterrupt as error:
-        sys.exit()
+        # pass due to SIGINT being handled in signalsabove, this is 
+        # to supress the stacktrace for the KeyboardInterrupt
+        pass
 
     frame = EthernetFrame(unprocessed_data)
     print(frame)
