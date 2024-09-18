@@ -19,6 +19,11 @@ I know, I know, I can just use scapy or use WireShark and dig into them, but whe
 sudo python McSniff.py
 ```
 
+### Run whilst working on script
+```bash
+while true; clear; echo 'Running...'; do sudo timeout 20 python McSniff.py; echo 'Sleeping...'; sleep 5; done
+```
+
 ## Example from scapy
 ```python
 from scapy.all import sniff

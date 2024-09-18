@@ -8,3 +8,7 @@ def format_mac(data):
 
 def print_green(output):
     print(GREEN, output, END, sep="")
+
+
+def print_yellow(output):
+    print(YELLOW, output, END, sep="")

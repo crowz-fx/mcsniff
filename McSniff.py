@@ -9,6 +9,7 @@ import socket, sys
 from classes.EthernetFrame import EthernetFrame
 from classes.constants.EtherTypes import *
 from classes.utils.Formatters import *
+print_yellow("[+] Starting McSniff...")
 
 # create the actual socket connection and bind to an interface
 try:
