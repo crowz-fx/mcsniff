@@ -11,6 +11,7 @@ from classes.constants.EtherTypes import *
 from classes.constants.IPProtocols import *
 from classes.protocols.IPv4 import IPv4
 from classes.protocols.UDP import UDP
+from classes.protocols.TCP import TCP
 from classes.utils.Formatters import *
 
 
@@ -90,13 +91,48 @@ while True:
             if ipv4.PROTOCOL == IP_PROTOCOLS_REVERSED["TCP"]:
                 print_blue(f"  \\_ TCP >")
 
-            # TODO payload
             # UDP
             if ipv4.PROTOCOL == IP_PROTOCOLS_REVERSED["UDP"]:
                 udp = UDP(ipv4.PAYLOAD)
                 print_blue(f"{udp}")
 
+                # TODO - clean this up
+                print_blue("    \\_ PAYLOAD")
+                print_blue("       -------")
+                print_blue(udp.PAYLOAD)
+                print_blue("       -------")
+
+            # TODO
+            # ICMP
+            if ipv4.PROTOCOL == IP_PROTOCOLS_REVERSED["ICMP"]:
+                print_blue(f"  \\_ICMP >")
+
+        # TODO
+        # ARP
+        if frame.ETHER_TYPE == ETHER_TYPES_REVERSED["ARP"]:
+            print_green("\\_   ARP > ")
+
+        # TODO
+        # RARP
+        if frame.ETHER_TYPE == ETHER_TYPES_REVERSED["RARP"]:
+            print_green("\\_  RARP > ")
+
         # TODO
         # IPv6
         if frame.ETHER_TYPE == ETHER_TYPES_REVERSED["IPv6"]:
             print_green("\\_  IPv6 > ")
+
+            # # TODO
+            # # TCP
+            # if ipv6.PROTOCOL == IP_PROTOCOLS_REVERSED["TCP"]:
+            #     print_blue(f"  \\_ TCP >")
+
+            # # TODO
+            # # UDP
+            # if ipv6.PROTOCOL == IP_PROTOCOLS_REVERSED["UDP"]:
+            #     print_blue(f"  \\_ UDP >")
+
+            # # TODO
+            # # ICMP
+            # if ipv6.PROTOCOL == IP_PROTOCOLS_REVERSED["ICMPv6"]:
+            #     print_blue(f"  \\_ICMPv6 >")

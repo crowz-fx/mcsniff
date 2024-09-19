@@ -11,6 +11,11 @@ def format_ipv4(data):
     return ".".join(format(b, "d") for b in data)
 
 
+# TODO - fix as not a clean implementation
+def format_payload(data):
+    return "".join(chr(b) for b in data)
+
+
 def print_green(output):
     print(GREEN, output, END, sep="")
 

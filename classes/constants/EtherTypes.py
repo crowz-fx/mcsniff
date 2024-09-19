@@ -1,9 +1,9 @@
 # use the hex values like in the standard
 # https://en.wikipedia.org/wiki/EtherType#Values
 ETHER_TYPES = {
-    # TODO - add in the rest
     0x0800: "IPv4",
     0x0806: "ARP",
+    0x8035: "RARP",
     0x86DD: "IPv6",
 }
 

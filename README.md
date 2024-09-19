@@ -14,9 +14,13 @@ I know, I know, I can just use scapy or use WireShark and dig into them, but whe
 Broken down into the OSI model layers, this tool can process/dump/inspect the following:
 ### L2 - Data Link Layer
 * Ethernet frame(s)
+* ARP/RARP packet(s)?
+  * Contention as technically not but also L2.5 depending who you ask lol
 
 ### L3 - Network Layer
 * IPv4 packet(s)
+* IPv6 packet(s)
+* ICMP/ICMPv6 packets(s)
 
 ### L4 - Transport Layer
 * TCP segment(s)

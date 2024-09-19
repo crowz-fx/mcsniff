@@ -2,15 +2,18 @@
 
 import struct
 
+from classes.utils.Formatters import format_payload
+
 
 class UDP:
     # 8 = src port (2), dest port (2), length (2), checksum (2)
     PACKET_HEADER_LEN = 8
 
     def __init__(self, data) -> None:
-        self.PACKET_HEADER, self.PAYLOAD = self.process_packet(data)
+        self.PACKET_HEADER, self.RAW_PAYLOAD = self.process_packet(data)
         self.SRC_PORT, self.DEST_PORT, self.LENGTH, self.CHECKSUM = self.PACKET_HEADER
-        self.PAYLOAD_LEN = len(self.PAYLOAD)
+        self.PAYLOAD_LEN = len(self.RAW_PAYLOAD)
+        self.PAYLOAD = format_payload(self.RAW_PAYLOAD)
 
     def process_packet(self, data):
         return (
@@ -22,9 +25,9 @@ class UDP:
 
     def __str__(self) -> str:
         return (
-            f"\\_   UDP > "
+            f"  \\_ UDP > "
             + f"SourcePort=[{self.SRC_PORT}], "
             + f"DestinationPort=[{self.DEST_PORT}], "
-            + f"Length=[{self.PAYLOAD_LEN}] "
+            + f"PayloadLen=[{self.PAYLOAD_LEN}] "
             + f"Checksum=[{self.CHECKSUM}] "
         )
