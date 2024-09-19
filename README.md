@@ -12,11 +12,15 @@ I know, I know, I can just use scapy or use WireShark and dig into them, but whe
 
 ## Features and functionality
 Broken down into the OSI model layers, this tool can process/dump/inspect the following:
-### L2
+### L2 - Data Link Layer
 * Ethernet frame(s)
 
-### L3
+### L3 - Network Layer
 * IPv4 packet(s)
+
+### L4 - Transport Layer
+* TCP segment(s)
+* UDP datagram(s)
 
 ## Run
 ```bash

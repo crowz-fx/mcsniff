@@ -8,7 +8,9 @@ import socket, sys, signal, os
 
 from classes.EthernetFrame import EthernetFrame
 from classes.constants.EtherTypes import *
+from classes.constants.IPProtocols import *
 from classes.protocols.IPv4 import IPv4
+from classes.protocols.UDP import UDP
 from classes.utils.Formatters import *
 
 
@@ -80,5 +82,21 @@ while True:
 
         # IPv4
         if frame.ETHER_TYPE == ETHER_TYPES_REVERSED["IPv4"]:
-            print_green(f"{IPv4(frame.PAYLOAD)}")
+            ipv4 = IPv4(frame.PAYLOAD)
+            print_green(f"{ipv4}")
 
+            # TODO
+            # TCP
+            if ipv4.PROTOCOL == IP_PROTOCOLS_REVERSED["TCP"]:
+                print_blue(f"  \\_ TCP >")
+
+            # TODO payload
+            # UDP
+            if ipv4.PROTOCOL == IP_PROTOCOLS_REVERSED["UDP"]:
+                udp = UDP(ipv4.PAYLOAD)
+                print_blue(f"{udp}")
+
+        # TODO
+        # IPv6
+        if frame.ETHER_TYPE == ETHER_TYPES_REVERSED["IPv6"]:
+            print_green("\\_  IPv6 > ")
