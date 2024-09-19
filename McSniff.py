@@ -89,7 +89,15 @@ while True:
             # TODO
             # TCP
             if ipv4.PROTOCOL == IP_PROTOCOLS_REVERSED["TCP"]:
-                print_blue(f"  \\_ TCP >")
+                tcp = TCP(ipv4.PAYLOAD)
+                print_blue(f"{tcp}")
+
+                # TODO - clean this up
+                if tcp.PAYLOAD_LEN > 0:
+                    print_blue("    \\_ PAYLOAD")
+                    print_blue("       -------")
+                    print_blue(tcp.PAYLOAD)
+                    print_blue("       -------")
 
             # UDP
             if ipv4.PROTOCOL == IP_PROTOCOLS_REVERSED["UDP"]:
@@ -97,10 +105,11 @@ while True:
                 print_blue(f"{udp}")
 
                 # TODO - clean this up
-                print_blue("    \\_ PAYLOAD")
-                print_blue("       -------")
-                print_blue(udp.PAYLOAD)
-                print_blue("       -------")
+                if udp.PAYLOAD_LEN > 0:
+                    print_blue("    \\_ PAYLOAD")
+                    print_blue("       -------")
+                    print_blue(udp.PAYLOAD)
+                    print_blue("       -------")
 
             # TODO
             # ICMP
