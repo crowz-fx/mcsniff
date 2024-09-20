@@ -11,18 +11,24 @@ I know, I know, I can just use scapy or use WireShark and dig into them, but whe
 2. For a deep dive into ethernet frames, see [this great resource](https://www.freecodecamp.org/news/the-complete-guide-to-the-ethernet-protocol/)
 
 ## Features and functionality
+### Tool features
+* Listen on different interfaces
+* Track statistics (start/end time, counts of frames/packets/etc.)
+* All the `things` listed below under `OSI layers`
+
+### OSI layers
 Broken down into the OSI model layers, this tool can process/dump/inspect the following:
-### L2 - Data Link Layer
+#### L2 - Data Link Layer
 * Ethernet frame(s)
 * ARP/RARP packet(s)?
   * Contention as technically not but also L2.5 depending who you ask lol
 
-### L3 - Network Layer
+#### L3 - Network Layer
 * IPv4 packet(s)
 * IPv6 packet(s)
 * ICMP/ICMPv6 packets(s)
 
-### L4 - Transport Layer
+#### L4 - Transport Layer
 * TCP segment(s)
 * UDP datagram(s)
 
@@ -43,7 +49,8 @@ while true; clear; echo 'Running...'; do sudo timeout 20 python McSniff.py; echo
 4. [EtherType Wiki](https://en.wikipedia.org/wiki/EtherType)
 5. [IPv4 packet structure Wiki](https://en.wikipedia.org/wiki/IPv4#Packet_structure)
 6. [IP protocol numbers Wiki](https://en.wikipedia.org/wiki/List_of_IP_protocol_numbers)
-
+7. [UDP structure Wiki](https://en.wikipedia.org/wiki/User_Datagram_Protocol#UDP_datagram_structure)
+8. [TCP strcuture Wiki](https://en.wikipedia.org/wiki/Transmission_Control_Protocol#TCP_segment_structure)
 
 ## Example from scapy
 ```python
