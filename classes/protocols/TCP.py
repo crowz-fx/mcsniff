@@ -13,7 +13,7 @@ class TCP:
     # 'options' handled below, is optional so default to 0
     PACKET_OPTIONS_LEN = 0
 
-    def __init__(self, data) -> None:
+    def __init__(self, data: bytes) -> None:
         self.PACKET_HEADER, PACKET_UNPROCESSED_DATA = self.process_packet(data)
         (
             self.SRC_PORT,
@@ -50,7 +50,7 @@ class TCP:
         self.PAYLOAD = format_payload(self.RAW_PAYLOAD)
         self.PAYLOAD_LEN = len(self.PAYLOAD)
 
-    def process_packet(self, data):
+    def process_packet(self, data: bytes):
         return (
             # strip header into its parts for further processing
             struct.unpack("!HHIIHHHH", data[: self.PACKET_HEADER_LEN]),

@@ -30,21 +30,36 @@ STAT_COUNTS.update({key: 0 for key in IP_PROTOCOLS_REVERSED.keys()}),
 
 
 # easy way to manage 'all the things to do when quitting'
-def do_exit(exit_code=0):
-    print_yellow(f"[-] Statistics of session [{STAT_COUNTS}]")
+def do_exit(exit_code: int = 0):
+    handle_time("end")
+
+    # remove any time related stats for the output
+    final_counts = (
+        "".join(
+            [
+                f"\n\t\t{k}:{STAT_COUNTS[k]}"
+                for k in STAT_COUNTS.keys()
+                if not k.endswith("time")
+            ],
+        )
+        + "\n"
+    )
+    print_yellow("[-] Statistics of session...")
+    print_green(final_counts)
+
     print_yellow("[X] Stopping McSniff!")
     sys.exit(exit_code)
 
 
 # when we get a signal, handle accordingly
-def exit_handler(signum, frame):
-    print_yellow(f"[-] Handling SIGNAL=[{signal.Signals(signum).name}]...")
+def exit_handler(signum: signal.signal, frame):
+    print_yellow(f"\n[-] Handling SIGNAL=[{signal.Signals(signum).name}]...")
 
     # TODO - maybe consume and ignore some like SIGSTP?
     do_exit()
 
 
-def update_stats(key, value=1):
+def update_stats(key: str, value: any = 1):
     # for counts, append
     if type(value) is int:
         STAT_COUNTS[key] += value
@@ -54,8 +69,14 @@ def update_stats(key, value=1):
         STAT_COUNTS[key] = value
 
 
+def handle_time(classification: str):
+    time_now = str(datetime.now())
+    print_yellow(f"[-] {classification.capitalize()} time of sniffing [{time_now}]")
+    update_stats(f"{classification.lower()}_time", time_now)
+
+
 # handle all the magic in socket setup, and binding to interfaces
-def setup_socket(interface_name) -> socket:
+def setup_socket(interface_name: str) -> socket:
     # create the actual socket connection and bind to an interface
     try:
         # family - 17, low-level packet interface
@@ -64,9 +85,9 @@ def setup_socket(interface_name) -> socket:
         s = socket.socket(socket.AF_PACKET, socket.SOCK_RAW, socket.ntohs(0x0003))
 
         # dump out all interfaces
-        print_yellow(
-            f"[-] Avaliable interfaces are [{[interface[1] for interface in socket.if_nameindex()]}]"
-        )
+        all_interfaces = [interface[1] for interface in socket.if_nameindex()]
+        all_interfaces_formatted = ", ".join(all_interfaces)
+        print_yellow(f"[-] Avaliable interfaces are [{all_interfaces_formatted}]")
 
         # bind to a specific interface
         s.bind((interface_name, 0))
@@ -97,10 +118,7 @@ if __name__ == "__main__":
 
     print_yellow("[+] Starting McSniff...")
     s = setup_socket("eth0")
-
-    start_time = str(datetime.now())
-    print_yellow(f"[-] Start time of sniffing [{start_time}]")
-    update_stats("start_time", start_time)
+    handle_time("start")
 
     # loop and process each packet recieved
     while True:
@@ -126,6 +144,8 @@ if __name__ == "__main__":
                 update_stats("packets")
                 update_stats("IPv4")
                 print_green(f"{ipv4}")
+
+                # TODO - in payload, search for things like user:pwds?
 
                 # TODO
                 # TCP
@@ -161,6 +181,8 @@ if __name__ == "__main__":
                 if ipv4.PROTOCOL == IP_PROTOCOLS_REVERSED["ICMP"]:
                     update_stats("ICMP")
                     print_blue(f"  \\_ICMP >")
+
+            # TODO maybe later ARP spoofing?
 
             # TODO
             # ARP

@@ -14,7 +14,7 @@ class IPv4:
     # 'options' handled below, is optional so default to 0
     HEADER_OPTIONS_LEN = 0
 
-    def __init__(self, data):
+    def __init__(self, data: bytes):
         self.REQUIRED_HEADER, PACKET_UNPROCESSED_DATA = self.process_packet(data)
         (
             self.VERSION_IHL_RAW,
@@ -50,7 +50,7 @@ class IPv4:
         self.PAYLOAD = PACKET_UNPROCESSED_DATA[self.HEADER_OPTIONS_LEN :]
         self.PAYLOAD_LEN = len(self.PAYLOAD)
 
-    def process_packet(self, data):
+    def process_packet(self, data: bytes):
         return (
             struct.unpack("!BBHHHBBH4s4s", data[: self.HEADER_REQUIRED_LEN]),
             data[self.HEADER_REQUIRED_LEN :],

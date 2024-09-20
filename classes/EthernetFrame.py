@@ -10,12 +10,12 @@ class EthernetFrame:
     # 14 = dest mac (6), src mac (6), ethertype/len (2)
     FRAME_HEADER_LEN = 14
 
-    def __init__(self, data) -> None:
+    def __init__(self, data: bytes) -> None:
         self.FRAME_HEADER, self.PAYLOAD = self.process_frame(data)
         self.DEST_MAC, self.SRC_MAC, self.ETHER_TYPE = self.FRAME_HEADER
         self.PAYLOAD_LEN = len(self.PAYLOAD)
 
-    def process_frame(self, data):
+    def process_frame(self, data: bytes):
         return (
             # first bytes is the header, split into tuple
             struct.unpack("!6s6sH", data[: self.FRAME_HEADER_LEN]),
