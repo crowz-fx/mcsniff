@@ -10,6 +10,7 @@ import socket, sys, signal
 from classes.EthernetFrame import EthernetFrame
 from classes.constants.EtherTypes import *
 from classes.constants.IPProtocols import *
+from classes.protocols.ICMP import ICMP
 from classes.protocols.IPv4 import IPv4
 from classes.protocols.UDP import UDP
 from classes.protocols.TCP import TCP
@@ -147,7 +148,6 @@ if __name__ == "__main__":
 
                 # TODO - in payload, search for things like user:pwds?
 
-                # TODO
                 # TCP
                 if ipv4.PROTOCOL == IP_PROTOCOLS_REVERSED["TCP"]:
                     update_stats("TCP")
@@ -176,11 +176,19 @@ if __name__ == "__main__":
                         print_blue(udp.PAYLOAD)
                         print_blue("       -------")
 
-                # TODO
                 # ICMP
                 if ipv4.PROTOCOL == IP_PROTOCOLS_REVERSED["ICMP"]:
                     update_stats("ICMP")
-                    print_blue(f"  \\_ICMP >")
+                    icmp = ICMP(ipv4.PAYLOAD)
+                    print_blue(f"{icmp}")
+
+                    # TODO - clean this up
+                    if icmp.PAYLOAD_LEN > 0:
+                        update_stats("datagrams")
+                        print_blue("    \\_ PAYLOAD")
+                        print_blue("       -------")
+                        print_blue(icmp.PAYLOAD)
+                        print_blue("       -------")
 
             # TODO maybe later ARP spoofing?
 
