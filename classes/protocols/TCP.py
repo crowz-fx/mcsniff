@@ -59,11 +59,18 @@ class TCP:
         )
 
     def __str__(self) -> str:
-        # TODO - add rest of values
+        # process the flags, only show ones that are actually enabled
+        flags_processed = ",".join(
+            flag_key for flag_key in self.FLAGS.keys() if self.FLAGS[flag_key]
+        )
+
         return (
             f"  \\_ TCP > "
             + f"SourcePort=[{self.SRC_PORT}], "
             + f"DestinationPort=[{self.DEST_PORT}], "
-            + f"PayloadLen=[{self.PAYLOAD_LEN}] "
+            + f"Flags=[{flags_processed}], "
+            + f"SeqNo=[{self.SEQUENCE_NO}], "
+            + f"AckNo=[{self.ACKNOWLEGE_NO}], "
+            + f"PayloadLen=[{self.PAYLOAD_LEN}], "
             + f"Checksum=[{self.CHECKSUM}] "
         )

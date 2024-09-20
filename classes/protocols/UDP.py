@@ -28,6 +28,6 @@ class UDP:
             f"  \\_ UDP > "
             + f"SourcePort=[{self.SRC_PORT}], "
             + f"DestinationPort=[{self.DEST_PORT}], "
+            + f"Checksum=[{self.CHECKSUM}], "
             + f"PayloadLen=[{self.PAYLOAD_LEN}] "
-            + f"Checksum=[{self.CHECKSUM}] "
         )
