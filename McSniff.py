@@ -37,7 +37,7 @@ def do_exit(exit_code: int = 0):
     final_counts = (
         "".join(
             [
-                f"\n\t\t{k}:{STAT_COUNTS[k]}"
+                f"\n      {k}:{STAT_COUNTS[k]}"
                 for k in STAT_COUNTS.keys()
                 if not k.endswith("time")
             ],
@@ -79,15 +79,15 @@ def handle_time(classification: str):
 def setup_socket(interface_name: str) -> socket:
     # create the actual socket connection and bind to an interface
     try:
-        # family - 17, low-level packet interface
-        # type -  3, says on the tin, raw protocol access
-        # protocol - ETH_P_ALL, give us every packet!
-        s = socket.socket(socket.AF_PACKET, socket.SOCK_RAW, socket.ntohs(0x0003))
-
         # dump out all interfaces
         all_interfaces = [interface[1] for interface in socket.if_nameindex()]
         all_interfaces_formatted = ", ".join(all_interfaces)
         print_yellow(f"[-] Avaliable interfaces are [{all_interfaces_formatted}]")
+
+        # family - 17, low-level packet interface
+        # type -  3, says on the tin, raw protocol access
+        # protocol - ETH_P_ALL, give us every packet!
+        s = socket.socket(socket.AF_PACKET, socket.SOCK_RAW, socket.ntohs(0x0003))
 
         # bind to a specific interface
         s.bind((interface_name, 0))
