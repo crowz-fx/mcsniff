@@ -51,6 +51,7 @@ while true; clear; echo 'Running...'; do sudo timeout 20 python McSniff.py; echo
 6. [IP protocol numbers Wiki](https://en.wikipedia.org/wiki/List_of_IP_protocol_numbers)
 7. [UDP structure Wiki](https://en.wikipedia.org/wiki/User_Datagram_Protocol#UDP_datagram_structure)
 8. [TCP strcuture Wiki](https://en.wikipedia.org/wiki/Transmission_Control_Protocol#TCP_segment_structure)
+9. [Ping (ICMP/ICMPv6) structure Wiki](https://en.wikipedia.org/wiki/Ping_(networking_utility)#Message_format)
 
 ## Example from scapy
 ```python
