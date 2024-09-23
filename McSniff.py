@@ -10,6 +10,7 @@ import socket, sys, signal
 from classes.EthernetFrame import EthernetFrame
 from classes.constants.EtherTypes import *
 from classes.constants.IPProtocols import *
+from classes.protocols.ARP import ARP
 from classes.protocols.ICMP import ICMP
 from classes.protocols.IPv4 import IPv4
 from classes.protocols.UDP import UDP
@@ -192,19 +193,20 @@ if __name__ == "__main__":
 
             # TODO maybe later ARP spoofing?
 
-            # TODO
             # ARP
             if frame.ETHER_TYPE == ETHER_TYPES_REVERSED["ARP"]:
+                arp = ARP("ARP", frame.PAYLOAD)
                 update_stats("ARP")
                 update_stats("packets")
-                print_green("\\_   ARP > ")
+                print_green(arp)
 
-            # TODO
             # RARP
             if frame.ETHER_TYPE == ETHER_TYPES_REVERSED["RARP"]:
+                # same as ARP but different PTYPE
+                rarp = ARP("RARP", frame.PAYLOAD)
                 update_stats("RARP")
                 update_stats("packets")
-                print_green("\\_  RARP > ")
+                print_green(rarp)
 
             # TODO
             # IPv6

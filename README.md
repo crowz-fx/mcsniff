@@ -42,6 +42,45 @@ sudo python McSniff.py
 while true; clear; echo 'Running...'; do sudo timeout 20 python McSniff.py; echo 'Sleeping...'; sleep 5; done
 ```
 
+## Triggering payloads
+### L2
+```bash
+# eth - be connected to a network
+
+# arp
+sudo arping <destination>
+
+# rarp - not really seen, can happen during boot but DCHP superseeded it
+```
+
+### L3
+```bash
+# ICMP (v4)
+ping -4 <destination>
+ping -4 google.co.uk
+
+# ICMPv6 - need to have IPv6 enabled on interface ofc
+ping -6 <destination>
+ping -6 google.co.uk
+```
+
+### L4
+```bash
+# TCP - unsecure HTTP requests are great as you can see the payload, HTTPS is encrypted so you can't see payload (unless you have the certs to decrypt)
+curl http://<destination>
+
+# -k means ignore certs/verification, connect anyway
+curl -k http://httpforever.com/
+
+# UDP - DNS requests are easiest to trigger
+dig <host>
+dig google.co.uk
+
+# to force the query to a specific name server, specify the @ flag
+dig @<name server like 1.1.1.1> <host>
+dig @1.1.1.1 google.co.uk
+```
+
 ## Further reading/docs
 1. [Python struct formatting](https://docs.python.org/3/library/struct.html#format-characters)
 2. [Python socket docs](https://docs.python.org/3/library/socket.html)
@@ -52,6 +91,7 @@ while true; clear; echo 'Running...'; do sudo timeout 20 python McSniff.py; echo
 7. [UDP structure Wiki](https://en.wikipedia.org/wiki/User_Datagram_Protocol#UDP_datagram_structure)
 8. [TCP strcuture Wiki](https://en.wikipedia.org/wiki/Transmission_Control_Protocol#TCP_segment_structure)
 9. [Ping (ICMP/ICMPv6) structure Wiki](https://en.wikipedia.org/wiki/Ping_(networking_utility)#Message_format)
+10. [ARP structure Wiki](https://en.wikipedia.org/wiki/Address_Resolution_Protocol#Packet_structure)
 
 ## Example from scapy
 ```python
