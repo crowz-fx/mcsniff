@@ -65,9 +65,9 @@ class IPv4:
 
         return (
             f"\\_  IPv4 > "
-            + f"Protocol=[{protocol_formatted}], "
-            + f"SourceIP=[{self.SRC_IP}], "
-            + f"DestinationIP=[{self.DEST_IP}], "
+            + f"Protocol=[{protocol_formatted}] "
+            + f"SourceIP=[{self.SRC_IP}] "
+            + f"DestinationIP=[{self.DEST_IP}] "
             + f"TTL=[{self.TIME_TO_LIVE}] "
             + f"PayloadLen=[{self.PAYLOAD_LEN}] "
         )

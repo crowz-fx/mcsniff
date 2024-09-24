@@ -203,6 +203,7 @@ if __name__ == "__main__":
                 update_stats("ARP")
                 update_stats("packets")
                 print_green(arp)
+                print_blue(arp.ARP_DESCRIPTION)
 
             # RARP
             if frame.ETHER_TYPE == ETHER_TYPES_REVERSED["RARP"]:

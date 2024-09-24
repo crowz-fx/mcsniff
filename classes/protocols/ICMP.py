@@ -59,8 +59,8 @@ class ICMP:
 
         return (
             f"  \\_ICMP > "
-            + f"Type=[{type_formatted}], "
-            + f"Code=[{code_formatted}], "
-            + f"CheckSum=[{self.CHECKSUM}], "
+            + f"Type=[{type_formatted}] "
+            + f"Code=[{code_formatted}] "
+            + f"CheckSum=[{self.CHECKSUM}] "
             + f"RestOfHeader=[{rest_of_header_formatted}] "
         )

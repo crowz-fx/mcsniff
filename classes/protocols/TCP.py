@@ -66,11 +66,11 @@ class TCP:
 
         return (
             f"  \\_ TCP > "
-            + f"SourcePort=[{self.SRC_PORT}], "
-            + f"DestinationPort=[{self.DEST_PORT}], "
-            + f"Flags=[{flags_processed}], "
-            + f"SeqNo=[{self.SEQUENCE_NO}], "
-            + f"AckNo=[{self.ACKNOWLEGE_NO}], "
-            + f"PayloadLen=[{self.PAYLOAD_LEN}], "
+            + f"SourcePort=[{self.SRC_PORT}] "
+            + f"DestinationPort=[{self.DEST_PORT}] "
+            + f"Flags=[{flags_processed}] "
+            + f"SeqNo=[{self.SEQUENCE_NO}] "
+            + f"AckNo=[{self.ACKNOWLEGE_NO}] "
+            + f"PayloadLen=[{self.PAYLOAD_LEN}] "
             + f"Checksum=[{self.CHECKSUM}] "
         )
