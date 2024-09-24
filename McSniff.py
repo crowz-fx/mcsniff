@@ -156,7 +156,11 @@ if __name__ == "__main__":
                     print_blue(f"{tcp}")
 
                     # TODO - clean this up
-                    if tcp.PAYLOAD_LEN > 0:
+                    if (
+                        tcp.PAYLOAD_LEN > 0
+                        and tcp.DEST_PORT != 443
+                        and tcp.SRC_PORT != 443
+                    ):
                         update_stats("segments")
                         print_blue("    \\_ PAYLOAD")
                         print_blue("       -------")
