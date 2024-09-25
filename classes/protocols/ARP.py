@@ -58,16 +58,24 @@ class ARP:
             self.TARGET_PROTOCOL_ADDR = format_ipv4(self.TARGET_PROTOCOL_ADDR_RAW)
 
             # determine if possible, what type of ARP
-            self.ARP_DESCRIPTION = "You figure it out!"
+            self.ARP_DESCRIPTION = "ARP:Unknown"
 
             if self.OPERATION == 1:
                 if self.TARGET_HARDWARE_ADDR == "00:00:00:00:00:00":
                     if self.SENDER_PROTOCOL_ADDR == self.TARGET_PROTOCOL_ADDR:
-                        self.ARP_DESCRIPTION = "ARP - Announcement"
+                        self.ARP_DESCRIPTION = "ARP:Announcement"
                     elif self.SENDER_PROTOCOL_ADDR == "0.0.0.0":
-                        self.ARP_DESCRIPTION = "ARP - Probe"
-                    else:
-                        self.ARP_DESCRIPTION = "ARP - Request"
+                        self.ARP_DESCRIPTION = "ARP:Probe"
+                else:
+                    self.ARP_DESCRIPTION = "ARP:Request"
+            elif self.OPERATION == 2:
+                if (
+                    self.SENDER_PROTOCOL_ADDR == self.TARGET_PROTOCOL_ADDR
+                    and self.TARGET_HARDWARE_ADDR == "00:00:00:00:00:00"
+                ):
+                    self.ARP_DESCRIPTION = "ARP:Gratuitous"
+                else:
+                    self.ARP_DESCRIPTION = "ARP:Reply"
 
     def process_packet(self, data: bytes):
         return (

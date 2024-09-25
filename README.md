@@ -27,6 +27,7 @@ Broken down into the OSI model layers, this tool can process/dump/inspect the fo
 * IPv4 packet(s)
 * IPv6 packet(s)
 * ICMP/ICMPv6 packets(s)
+* IGMP packet(s)
 
 #### L4 - Transport Layer
 * TCP segment(s)

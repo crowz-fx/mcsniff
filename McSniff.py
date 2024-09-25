@@ -195,6 +195,13 @@ if __name__ == "__main__":
                         print_blue(icmp.PAYLOAD)
                         print_blue("       -------")
 
+                # IGMP
+                # TODO
+                if ipv4.PROTOCOL == IP_PROTOCOLS_REVERSED["IGMP"]:
+                    update_stats("IGMP")
+                    update_stats("packets")
+                    print_blue("  \\_IGMP > ")
+
             # TODO maybe later ARP spoofing?
 
             # ARP
@@ -203,7 +210,7 @@ if __name__ == "__main__":
                 update_stats("ARP")
                 update_stats("packets")
                 print_green(arp)
-                print_blue(arp.ARP_DESCRIPTION)
+                print_blue(f"  \\_ PAYLOAD - [{arp.ARP_DESCRIPTION}]")
 
             # RARP
             if frame.ETHER_TYPE == ETHER_TYPES_REVERSED["RARP"]:
