@@ -1,4 +1,5 @@
 import re
+from classes.State import OPTIONS
 from classes.constants.ColourChars import *
 
 
@@ -54,6 +55,14 @@ def format_ipv6(data: bytes) -> str:
 # TODO - fix as not a clean implementation
 def format_payload(data: bytes) -> str:
     return "".join(chr(b) for b in data)
+
+
+def print_payload(payload: str):
+    if OPTIONS["payload"]:
+        print_blue("|___PAYLOAD")
+        print_blue("       -------")
+        print_blue(payload)
+        print_blue("       -------")
 
 
 def print_green(output: str):

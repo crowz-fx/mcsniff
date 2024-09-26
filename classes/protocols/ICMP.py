@@ -55,7 +55,7 @@ class ICMP:
                     + str(rest_of_header_unpacked[1])
                 )
 
-            # TODO - maybe add deeper processing ofr time exceeded, unreachable, timestamp
+            # TODO - maybe add deeper processing for time exceeded, unreachable, timestamp
 
         return (
             f"|_ICMP > "

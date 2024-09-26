@@ -4,10 +4,11 @@
 
 """
 
-from datetime import date, datetime
-import socket, sys, signal
+from datetime import datetime
+import socket, sys, signal, argparse
 
 from classes.EthernetFrame import EthernetFrame
+from classes.State import *
 from classes.constants.EtherTypes import *
 from classes.constants.IPProtocols import *
 from classes.protocols.ARP import ARP
@@ -18,37 +19,25 @@ from classes.protocols.UDP import UDP
 from classes.protocols.TCP import TCP
 from classes.utils.Formatters import *
 
-# rudimentary tracking of frames, packets, ip proctols and time
-STAT_COUNTS = {
-    "start_time": None,
-    "end_time": None,
-    "frames": 0,
-    "packets": 0,
-    "segments": 0,
-    "datagrams": 0,
-}
-# two updates = pull all new values without needing to update this
-STAT_COUNTS.update({key: 0 for key in ETHER_TYPES_REVERSED.keys()}),
-STAT_COUNTS.update({key: 0 for key in IP_PROTOCOLS_REVERSED.keys()}),
-
 
 # easy way to manage 'all the things to do when quitting'
 def do_exit(exit_code: int = 0):
     handle_time("end")
 
-    # remove any time related stats for the output
-    final_counts = (
-        "".join(
-            [
-                f"\n      {k}:{STAT_COUNTS[k]}"
-                for k in STAT_COUNTS.keys()
-                if not k.endswith("time")
-            ],
+    if OPTIONS["statistics"]:
+        # remove any time related stats for the output
+        final_counts = (
+            "".join(
+                [
+                    f"\n      {k}:{STAT_COUNTS[k]}"
+                    for k in STAT_COUNTS.keys()
+                    if not k.endswith("time")
+                ],
+            )
+            + "\n"
         )
-        + "\n"
-    )
-    print_yellow("[-] Statistics of session...")
-    print_green(final_counts)
+        print_yellow("[-] Statistics of session...")
+        print_green(final_counts)
 
     print_yellow("[X] Stopping McSniff!")
     sys.exit(exit_code)
@@ -60,16 +49,6 @@ def exit_handler(signum: signal.signal, frame):
 
     # TODO - maybe consume and ignore some like SIGSTP?
     do_exit()
-
-
-def update_stats(key: str, value: any = 1):
-    # for counts, append
-    if type(value) is int:
-        STAT_COUNTS[key] += value
-
-    # for timestamps/time set new value
-    if type(value) is str:
-        STAT_COUNTS[key] = value
 
 
 def handle_time(classification: str):
@@ -112,7 +91,44 @@ def setup_socket(interface_name: str) -> socket:
 
 # main entrypoint into the script
 if __name__ == "__main__":
-    # TODO - add arg parsing properly, for now just take sys.argv[1] as iface
+    args_parser = argparse.ArgumentParser(
+        description="Network analyser (packet sniffer)... for you know, research purposes ;)"
+    )
+
+    args_parser.add_argument(
+        "interface",
+        type=str,
+        help="interface to analyse, run 'ip link' to list",
+        default=OPTIONS["interface"],
+    )
+    args_parser.add_argument(
+        "-p",
+        "--payload",
+        help="dump payload output",
+        action="store_true",
+        required=False,
+    )
+    args_parser.add_argument(
+        "-s",
+        "--stats",
+        help="enable and show statistics for what's been processed",
+        action="store_true",
+        required=False,
+    )
+    args_parser.add_argument(
+        "-t",
+        "--https",
+        help="include dumps even for 443 port payloads (encrypted traffic)",
+        action="store_true",
+        required=False,
+        default=False,
+    )
+
+    args = args_parser.parse_args()
+    OPTIONS["interface"] = args.interface
+    OPTIONS["payload"] = args.payload
+    OPTIONS["statistics"] = args.stats
+    OPTIONS["https"] = args.https
 
     # capture ctrl+c (SIGINT)
     signal.signal(signal.SIGINT, exit_handler)
@@ -141,6 +157,8 @@ if __name__ == "__main__":
         # check if it's a ETHER type we can process
         if frame.ETHER_TYPE in ETHER_TYPES:
 
+            # TODO - in payloads, search for things like user:pwds?
+
             # IPv4
             if frame.ETHER_TYPE == ETHER_TYPES_REVERSED["IPv4"]:
                 ipv4 = IPv4(frame.PAYLOAD)
@@ -148,25 +166,19 @@ if __name__ == "__main__":
                 update_stats("IPv4")
                 print_green(ipv4)
 
-                # TODO - in payload, search for things like user:pwds?
-
                 # TCP
                 if ipv4.PROTOCOL == IP_PROTOCOLS_REVERSED["TCP"]:
                     update_stats("TCP")
                     tcp = TCP(ipv4.PAYLOAD)
                     print_blue(tcp)
 
-                    # TODO - clean this up
-                    if (
-                        tcp.PAYLOAD_LEN > 0
-                        and tcp.DEST_PORT != 443
-                        and tcp.SRC_PORT != 443
-                    ):
+                    if tcp.PAYLOAD_LEN > 0:
                         update_stats("segments")
-                        print_blue("|___PAYLOAD")
-                        print_blue("       -------")
-                        print_blue(tcp.PAYLOAD)
-                        print_blue("       -------")
+
+                        if OPTIONS["https"] or (
+                            tcp.DEST_PORT != 443 and tcp.SRC_PORT != 443
+                        ):
+                            print_payload(tcp.PAYLOAD)
 
                 # UDP
                 if ipv4.PROTOCOL == IP_PROTOCOLS_REVERSED["UDP"]:
@@ -174,13 +186,9 @@ if __name__ == "__main__":
                     udp = UDP(ipv4.PAYLOAD)
                     print_blue(udp)
 
-                    # TODO - clean this up
                     if udp.PAYLOAD_LEN > 0:
                         update_stats("datagrams")
-                        print_blue("|___PAYLOAD")
-                        print_blue("       -------")
-                        print_blue(udp.PAYLOAD)
-                        print_blue("       -------")
+                        print_payload(udp.PAYLOAD)
 
                 # ICMP
                 if ipv4.PROTOCOL == IP_PROTOCOLS_REVERSED["ICMP"]:
@@ -188,22 +196,18 @@ if __name__ == "__main__":
                     icmp = ICMP(ipv4.PAYLOAD)
                     print_blue(icmp)
 
-                    # TODO - clean this up
                     if icmp.PAYLOAD_LEN > 0:
                         update_stats("datagrams")
-                        print_blue("|___PAYLOAD")
-                        print_blue("       -------")
-                        print_blue(icmp.PAYLOAD)
-                        print_blue("       -------")
+                        print_payload(icmp.PAYLOAD)
 
                 # IGMP
-                # TODO
                 if ipv4.PROTOCOL == IP_PROTOCOLS_REVERSED["IGMP"]:
+                    # TODO - implement IGMP
                     update_stats("IGMP")
                     update_stats("packets")
                     print_blue("|__IGMP > ")
 
-            # TODO maybe later ARP spoofing?
+            # TODO - maybe later ARP spoofing?
 
             # ARP
             if frame.ETHER_TYPE == ETHER_TYPES_REVERSED["ARP"]:
@@ -228,9 +232,9 @@ if __name__ == "__main__":
                 ipv6 = IPv6(frame.PAYLOAD)
                 print_green(ipv6)
 
-                # # TODO
                 # # ICMP
                 if ipv6.NEXT_HEADER == IP_PROTOCOLS_REVERSED["ICMPv6"]:
+                    # TODO - implement ICMPv6
                     print_blue(f"|__ICMPv6 >")
 
                 # TCP
@@ -239,17 +243,13 @@ if __name__ == "__main__":
                     tcp = TCP(ipv6.PAYLOAD)
                     print_blue(tcp)
 
-                    # TODO - clean this up
-                    if (
-                        tcp.PAYLOAD_LEN > 0
-                        and tcp.DEST_PORT != 443
-                        and tcp.SRC_PORT != 443
-                    ):
+                    if tcp.PAYLOAD_LEN > 0:
                         update_stats("segments")
-                        print_blue("|___PAYLOAD")
-                        print_blue("       -------")
-                        print_blue(tcp.PAYLOAD)
-                        print_blue("       -------")
+
+                        if OPTIONS["https"] or (
+                            tcp.DEST_PORT != 443 and tcp.SRC_PORT != 443
+                        ):
+                            print_payload(tcp.PAYLOAD)
 
                 # UDP
                 if ipv6.NEXT_HEADER == IP_PROTOCOLS_REVERSED["UDP"]:
@@ -257,12 +257,8 @@ if __name__ == "__main__":
                     udp = UDP(ipv6.PAYLOAD)
                     print_blue(udp)
 
-                    # TODO - clean this up
                     if udp.PAYLOAD_LEN > 0:
                         update_stats("datagrams")
-                        print_blue("|___PAYLOAD")
-                        print_blue("       -------")
-                        print_blue(udp.PAYLOAD)
-                        print_blue("       -------")
+                        print_payload(udp.PAYLOAD)
 
         print()

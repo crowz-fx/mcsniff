@@ -66,6 +66,8 @@ class ARP:
                         self.ARP_DESCRIPTION = "ARP:Announcement"
                     elif self.SENDER_PROTOCOL_ADDR == "0.0.0.0":
                         self.ARP_DESCRIPTION = "ARP:Probe"
+                    else:
+                        self.ARP_DESCRIPTION = "ARP:Request"
                 else:
                     self.ARP_DESCRIPTION = "ARP:Request"
             elif self.OPERATION == 2:
