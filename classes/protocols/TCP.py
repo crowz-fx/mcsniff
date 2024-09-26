@@ -65,7 +65,7 @@ class TCP:
         )
 
         return (
-            f"  \\_ TCP > "
+            f"|__TCP > "
             + f"SourcePort=[{self.SRC_PORT}] "
             + f"DestinationPort=[{self.DEST_PORT}] "
             + f"Flags=[{flags_processed}] "

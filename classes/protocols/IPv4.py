@@ -64,7 +64,7 @@ class IPv4:
             protocol_formatted = protocol_formatted + ":" + IP_PROTOCOLS[self.PROTOCOL]
 
         return (
-            f"\\_  IPv4 > "
+            f"|_IPv4 > "
             + f"Protocol=[{protocol_formatted}] "
             + f"SourceIP=[{self.SRC_IP}] "
             + f"DestinationIP=[{self.DEST_IP}] "

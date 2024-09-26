@@ -99,7 +99,7 @@ class ARP:
         operation_formatted = "1:Request" if self.OPERATION == 1 else "2:Reply"
 
         return (
-            f"\\_  {arp_type_formatted} > "
+            f"|_{arp_type_formatted} > "
             + f"HardwareType=[{hardware_type_formatted}] "
             + f"ProtocolType=[{protocol_type_formatted}] "
             + f"HardwareAddrLen=[{self.HARDWARE_ADDR_LEN}] "

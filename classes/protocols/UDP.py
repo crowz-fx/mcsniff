@@ -25,7 +25,7 @@ class UDP:
 
     def __str__(self) -> str:
         return (
-            f"  \\_ UDP > "
+            f"|__UDP > "
             + f"SourcePort=[{self.SRC_PORT}] "
             + f"DestinationPort=[{self.DEST_PORT}] "
             + f"Checksum=[{self.CHECKSUM}] "

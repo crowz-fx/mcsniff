@@ -58,7 +58,7 @@ class ICMP:
             # TODO - maybe add deeper processing ofr time exceeded, unreachable, timestamp
 
         return (
-            f"  \\_ICMP > "
+            f"|_ICMP > "
             + f"Type=[{type_formatted}] "
             + f"Code=[{code_formatted}] "
             + f"CheckSum=[{self.CHECKSUM}] "

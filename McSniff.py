@@ -13,6 +13,7 @@ from classes.constants.IPProtocols import *
 from classes.protocols.ARP import ARP
 from classes.protocols.ICMP import ICMP
 from classes.protocols.IPv4 import IPv4
+from classes.protocols.IPv6 import IPv6
 from classes.protocols.UDP import UDP
 from classes.protocols.TCP import TCP
 from classes.utils.Formatters import *
@@ -145,7 +146,7 @@ if __name__ == "__main__":
                 ipv4 = IPv4(frame.PAYLOAD)
                 update_stats("packets")
                 update_stats("IPv4")
-                print_green(f"{ipv4}")
+                print_green(ipv4)
 
                 # TODO - in payload, search for things like user:pwds?
 
@@ -153,7 +154,7 @@ if __name__ == "__main__":
                 if ipv4.PROTOCOL == IP_PROTOCOLS_REVERSED["TCP"]:
                     update_stats("TCP")
                     tcp = TCP(ipv4.PAYLOAD)
-                    print_blue(f"{tcp}")
+                    print_blue(tcp)
 
                     # TODO - clean this up
                     if (
@@ -162,7 +163,7 @@ if __name__ == "__main__":
                         and tcp.SRC_PORT != 443
                     ):
                         update_stats("segments")
-                        print_blue("    \\_ PAYLOAD")
+                        print_blue("|___PAYLOAD")
                         print_blue("       -------")
                         print_blue(tcp.PAYLOAD)
                         print_blue("       -------")
@@ -171,12 +172,12 @@ if __name__ == "__main__":
                 if ipv4.PROTOCOL == IP_PROTOCOLS_REVERSED["UDP"]:
                     update_stats("UDP")
                     udp = UDP(ipv4.PAYLOAD)
-                    print_blue(f"{udp}")
+                    print_blue(udp)
 
                     # TODO - clean this up
                     if udp.PAYLOAD_LEN > 0:
                         update_stats("datagrams")
-                        print_blue("    \\_ PAYLOAD")
+                        print_blue("|___PAYLOAD")
                         print_blue("       -------")
                         print_blue(udp.PAYLOAD)
                         print_blue("       -------")
@@ -185,12 +186,12 @@ if __name__ == "__main__":
                 if ipv4.PROTOCOL == IP_PROTOCOLS_REVERSED["ICMP"]:
                     update_stats("ICMP")
                     icmp = ICMP(ipv4.PAYLOAD)
-                    print_blue(f"{icmp}")
+                    print_blue(icmp)
 
                     # TODO - clean this up
                     if icmp.PAYLOAD_LEN > 0:
                         update_stats("datagrams")
-                        print_blue("    \\_ PAYLOAD")
+                        print_blue("|___PAYLOAD")
                         print_blue("       -------")
                         print_blue(icmp.PAYLOAD)
                         print_blue("       -------")
@@ -200,7 +201,7 @@ if __name__ == "__main__":
                 if ipv4.PROTOCOL == IP_PROTOCOLS_REVERSED["IGMP"]:
                     update_stats("IGMP")
                     update_stats("packets")
-                    print_blue("  \\_IGMP > ")
+                    print_blue("|__IGMP > ")
 
             # TODO maybe later ARP spoofing?
 
@@ -210,7 +211,7 @@ if __name__ == "__main__":
                 update_stats("ARP")
                 update_stats("packets")
                 print_green(arp)
-                print_blue(f"  \\_ PAYLOAD - [{arp.ARP_DESCRIPTION}]")
+                print_blue(f"|___PAYLOAD - [{arp.ARP_DESCRIPTION}]")
 
             # RARP
             if frame.ETHER_TYPE == ETHER_TYPES_REVERSED["RARP"]:
@@ -220,24 +221,48 @@ if __name__ == "__main__":
                 update_stats("packets")
                 print_green(rarp)
 
-            # TODO
             # IPv6
             if frame.ETHER_TYPE == ETHER_TYPES_REVERSED["IPv6"]:
                 update_stats("IPv6")
                 update_stats("packets")
-                print_green("\\_  IPv6 > ")
-
-                # # TODO
-                # # TCP
-                # if ipv6.PROTOCOL == IP_PROTOCOLS_REVERSED["TCP"]:
-                #     print_blue(f"  \\_ TCP >")
-
-                # # TODO
-                # # UDP
-                # if ipv6.PROTOCOL == IP_PROTOCOLS_REVERSED["UDP"]:
-                #     print_blue(f"  \\_ UDP >")
+                ipv6 = IPv6(frame.PAYLOAD)
+                print_green(ipv6)
 
                 # # TODO
                 # # ICMP
-                # if ipv6.PROTOCOL == IP_PROTOCOLS_REVERSED["ICMPv6"]:
-                #     print_blue(f"  \\_ICMPv6 >")
+                if ipv6.NEXT_HEADER == IP_PROTOCOLS_REVERSED["ICMPv6"]:
+                    print_blue(f"|__ICMPv6 >")
+
+                # TCP
+                if ipv6.NEXT_HEADER == IP_PROTOCOLS_REVERSED["TCP"]:
+                    update_stats("TCP")
+                    tcp = TCP(ipv6.PAYLOAD)
+                    print_blue(tcp)
+
+                    # TODO - clean this up
+                    if (
+                        tcp.PAYLOAD_LEN > 0
+                        and tcp.DEST_PORT != 443
+                        and tcp.SRC_PORT != 443
+                    ):
+                        update_stats("segments")
+                        print_blue("|___PAYLOAD")
+                        print_blue("       -------")
+                        print_blue(tcp.PAYLOAD)
+                        print_blue("       -------")
+
+                # UDP
+                if ipv6.NEXT_HEADER == IP_PROTOCOLS_REVERSED["UDP"]:
+                    update_stats("UDP")
+                    udp = UDP(ipv6.PAYLOAD)
+                    print_blue(udp)
+
+                    # TODO - clean this up
+                    if udp.PAYLOAD_LEN > 0:
+                        update_stats("datagrams")
+                        print_blue("|___PAYLOAD")
+                        print_blue("       -------")
+                        print_blue(udp.PAYLOAD)
+                        print_blue("       -------")
+
+        print()
