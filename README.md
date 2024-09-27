@@ -26,7 +26,8 @@ Broken down into the OSI model layers, this tool can process/dump/inspect the fo
 #### L3 - Network Layer
 * IPv4 packet(s)
 * IPv6 packet(s)
-* ICMP/ICMPv6 packets(s)
+* ICMP packets(s)
+* ICMPv6 packets(s)
 * IGMP packet(s)
 
 #### L4 - Transport Layer
@@ -34,13 +35,35 @@ Broken down into the OSI model layers, this tool can process/dump/inspect the fo
 * UDP datagram(s)
 
 ## Run
+### TL;DR
+Minimum input required is the interface to listen on
 ```bash
-sudo python McSniff.py
+sudo python McSniff.py <interface>
+
+# example
+sudo python McSniff.py eth0
+```
+### Help
+Using the `-h` flag will output the below for all options and params that can be supplied
+```
+~ sudo python McSniff.py -h
+usage: McSniff.py [-h] [-p] [-s] [-t] interface
+
+Network analyser (packet sniffer)... for you know, research purposes ;)
+
+positional arguments:
+  interface      interface to analyse, run 'ip link' to list
+
+options:
+  -h, --help     show this help message and exit
+  -p, --payload  dump payload output
+  -s, --stats    enable and show statistics for what has been processed
+  -t, --https    include dumps even for 443 port payloads (encrypted traffic)
 ```
 
 ### Run whilst working on script
 ```bash
-while true; clear; echo 'Running...'; do sudo timeout 20 python McSniff.py; echo 'Sleeping...'; sleep 5; done
+while true; clear; echo 'Running...'; do sudo timeout 20 python McSniff.py eth0; echo 'Sleeping...'; sleep 5; done
 ```
 
 ## Triggering payloads

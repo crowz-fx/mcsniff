@@ -136,7 +136,20 @@ if __name__ == "__main__":
     signal.signal(signal.SIGTERM, exit_handler)
 
     print_yellow("[+] Starting McSniff...")
-    s = setup_socket("eth0")
+    print_yellow(
+        "[-] Parameters > "
+        + f"interface=[{OPTIONS['interface']}] "
+        + f"enableStatistics=[{OPTIONS['statistics']}] "
+        + f"showPayload=[{OPTIONS['payload']}] "
+        + f"show443InPayload=[{OPTIONS['https']}] "
+    )
+    print_yellow(
+        "[-] Filters (shown==enabled) > "
+        + f"level2=[{', '.join(OPTIONS['level2'])}] "
+        + f"level3=[{', '.join(OPTIONS['level3'])}] "
+        + f"level4=[{', '.join(OPTIONS['level4'])}] "
+    )
+    s = setup_socket(OPTIONS["interface"])
     handle_time("start")
 
     # loop and process each packet recieved
