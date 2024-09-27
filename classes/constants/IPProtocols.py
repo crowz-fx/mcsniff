@@ -1,6 +1,7 @@
 # use the hex values like in the standard
 # https://en.wikipedia.org/wiki/List_of_IP_protocol_numbers
 IP_PROTOCOLS = {
+    0x00: "HOPOPT",
     0x01: "ICMP",
     0x02: "IGMP",
     0x04: "IPv4",

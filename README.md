@@ -47,18 +47,43 @@ sudo python McSniff.py eth0
 Using the `-h` flag will output the below for all options and params that can be supplied
 ```
 ~ sudo python McSniff.py -h
-usage: McSniff.py [-h] [-p] [-s] [-t] interface
+usage: McSniff.py [-h] [-p] [-s] [-t] [-2 [{ETH,ARP,RARP} ...]] [-3 [{IPv4,IPv6,ICMP,ICMPv6,IGMP} ...]] [-4 [{TCP,UDP} ...]] interface
 
 Network analyser (packet sniffer)... for you know, research purposes ;)
 
 positional arguments:
-  interface      interface to analyse, run 'ip link' to list
+  interface             interface to analyse, run 'ip link' to list
 
 options:
-  -h, --help     show this help message and exit
-  -p, --payload  dump payload output
-  -s, --stats    enable and show statistics for what has been processed
-  -t, --https    include dumps even for 443 port payloads (encrypted traffic)
+  -h, --help            show this help message and exit
+  -p, --payload         dump payload output
+  -s, --stats           enable and show statistics for what's been processed
+  -t, --https           include dumps even for 443 port payloads (encrypted traffic)
+  -2 [{ETH,ARP,RARP} ...], --level2 [{ETH,ARP,RARP} ...]
+                        OSI level 2 filter, by default listens for all, supply no args to ignore level
+  -3 [{IPv4,IPv6,ICMP,ICMPv6,IGMP} ...], --level3 [{IPv4,IPv6,ICMP,ICMPv6,IGMP} ...]
+                        OSI level 3 filter, by default listens for all, supply no args to ignore level
+  -4 [{TCP,UDP} ...], --level4 [{TCP,UDP} ...]
+                        OSI level 4 filter, by default listens for all, supply no args to ignore level
+
+```
+
+### Examples
+What you supply when toggling the levels is what you get, i.e. you supply only `IPv4` you get only `IPv4`. Also a little bit of common sense is required, for example if you specify nothing for `-3` you won't get anything for `L4 (TCP/UDP)` as it's nested within L3!
+
+#### Capture only frames, don't look deeper
+```bash
+sudo python McSniff.py eth0 -2 ETH
+```
+
+#### Capture only IPv4 and IPv6, ignoring ARP/RARP, ICMP etc.
+```bash
+sudo python McSniff.py eth0 -2 ETH -3 IPv4 IPv6
+```
+
+#### Capture only IPv6 UDP packets, dump payload and enable statistics
+```bash
+sudo python McSniff.py eth0 -2 ETH -3 IPv6 -4 UDP -p -s
 ```
 
 ### Run whilst working on script

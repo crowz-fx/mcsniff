@@ -7,7 +7,7 @@ OPTIONS = {
     "payload": False,
     "statistics": False,
     "https": False,
-    "level2": ["ARP", "RARP"],
+    "level2": ["ETH", "ARP", "RARP"],
     "level3": ["IPv4", "IPv6", "ICMP", "ICMPv6", "IGMP"],
     "level4": ["TCP", "UDP"],
 }
