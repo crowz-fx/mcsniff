@@ -52,9 +52,12 @@ def format_ipv6(data: bytes) -> str:
     return "".join(formatted).replace("_", "::")
 
 
-# TODO - fix as not a clean implementation
+# printable ASCII plus newline/tab so text protocols like HTTP stay readable,
+# everything else becomes '.' so payload bytes can never drive the terminal
 def format_payload(data: bytes) -> str:
-    return "".join(chr(b) for b in data)
+    return "".join(
+        chr(b) if 0x20 <= b <= 0x7E or b in (0x0A, 0x09) else "." for b in data
+    )
 
 
 def print_payload(payload: str):
