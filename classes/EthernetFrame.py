@@ -16,6 +16,11 @@ class EthernetFrame:
         self.PAYLOAD_LEN = len(self.PAYLOAD)
 
     def process_frame(self, data: bytes):
+        if len(data) < self.FRAME_HEADER_LEN:
+            raise ValueError(
+                f"Ethernet frame needs >= {self.FRAME_HEADER_LEN} bytes, got {len(data)}"
+            )
+
         return (
             # first bytes is the header, split into tuple
             struct.unpack("!6s6sH", data[: self.FRAME_HEADER_LEN]),

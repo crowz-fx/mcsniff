@@ -51,6 +51,11 @@ class IPv4:
         self.PAYLOAD_LEN = len(self.PAYLOAD)
 
     def process_packet(self, data: bytes):
+        if len(data) < self.HEADER_REQUIRED_LEN:
+            raise ValueError(
+                f"IPv4 needs >= {self.HEADER_REQUIRED_LEN} bytes, got {len(data)}"
+            )
+
         return (
             struct.unpack("!BBHHHBBH4s4s", data[: self.HEADER_REQUIRED_LEN]),
             data[self.HEADER_REQUIRED_LEN :],

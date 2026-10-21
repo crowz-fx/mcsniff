@@ -16,6 +16,11 @@ class UDP:
         self.PAYLOAD = format_payload(self.RAW_PAYLOAD)
 
     def process_packet(self, data: bytes):
+        if len(data) < self.PACKET_HEADER_LEN:
+            raise ValueError(
+                f"UDP needs >= {self.PACKET_HEADER_LEN} bytes, got {len(data)}"
+            )
+
         return (
             # first bytes is the header, split into tuple
             struct.unpack("!HHHH", data[: self.PACKET_HEADER_LEN]),

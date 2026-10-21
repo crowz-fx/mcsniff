@@ -33,6 +33,9 @@ class ARP:
             self.OPERATION,
         ), UNPROCESSED_HEADER = self.process_packet(data)
 
+        # determine if possible, what type of ARP, set before branch so always exists
+        self.ARP_DESCRIPTION = "ARP:Unknown"
+
         # only process IPv4 over Ethernet ARP messages
         if self.HARDWARE_ADDR_LEN != 6 or self.PROTOCOL_ADDR_LEN != 4:
             (
@@ -42,6 +45,13 @@ class ARP:
                 self.TARGET_PROTOCOL_ADDR,
             ) = (None, None, None, None)
         else:
+            addresses_len = self.MAX_HEADER_LEN - self.FIXED_HEADER_LEN
+            if len(UNPROCESSED_HEADER) < addresses_len:
+                raise ValueError(
+                    f"{self.ARP_TYPE} addresses need >= {addresses_len} bytes, "
+                    + f"got {len(UNPROCESSED_HEADER)}"
+                )
+
             (
                 self.SENDER_HARDWARE_ADDR_RAW,
                 self.SENDER_PROTOCOL_ADDR_RAW,
@@ -49,16 +59,13 @@ class ARP:
                 self.TARGET_PROTOCOL_ADDR_RAW,
             ) = struct.unpack(
                 "!6s4s6s4s",
-                UNPROCESSED_HEADER[: self.MAX_HEADER_LEN - self.FIXED_HEADER_LEN],
+                UNPROCESSED_HEADER[:addresses_len],
             )
 
             self.SENDER_HARDWARE_ADDR = format_mac(self.SENDER_HARDWARE_ADDR_RAW)
             self.SENDER_PROTOCOL_ADDR = format_ipv4(self.SENDER_PROTOCOL_ADDR_RAW)
             self.TARGET_HARDWARE_ADDR = format_mac(self.TARGET_HARDWARE_ADDR_RAW)
             self.TARGET_PROTOCOL_ADDR = format_ipv4(self.TARGET_PROTOCOL_ADDR_RAW)
-
-            # determine if possible, what type of ARP
-            self.ARP_DESCRIPTION = "ARP:Unknown"
 
             if self.OPERATION == 1:
                 if self.TARGET_HARDWARE_ADDR == "00:00:00:00:00:00":
@@ -80,6 +87,11 @@ class ARP:
                     self.ARP_DESCRIPTION = "ARP:Reply"
 
     def process_packet(self, data: bytes):
+        if len(data) < self.FIXED_HEADER_LEN:
+            raise ValueError(
+                f"{self.ARP_TYPE} needs >= {self.FIXED_HEADER_LEN} bytes, got {len(data)}"
+            )
+
         return (
             struct.unpack("!HHBBH", data[: self.FIXED_HEADER_LEN]),
             data[self.FIXED_HEADER_LEN :],
@@ -95,7 +107,7 @@ class ARP:
 
         protocol_type_formatted = str(self.PROTOCOL_TYPE)
 
-        if ETHER_TYPES[self.PROTOCOL_TYPE]:
+        if self.PROTOCOL_TYPE in ETHER_TYPES:
             protocol_type_formatted += ":" + str(ETHER_TYPES[self.PROTOCOL_TYPE])
 
         operation_formatted = "1:Request" if self.OPERATION == 1 else "2:Reply"

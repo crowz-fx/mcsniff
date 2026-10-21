@@ -20,6 +20,7 @@ STAT_COUNTS = {
     "packets": 0,
     "segments": 0,
     "datagrams": 0,
+    "malformed": 0,
 }
 # two updates = pull all new values without needing to update this
 STAT_COUNTS.update({key: 0 for key in ETHER_TYPES_REVERSED.keys()}),

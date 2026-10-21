@@ -32,6 +32,11 @@ class IPv6:
         self.DEST_IP = format_ipv6(self.DEST_IP_RAW)
 
     def process_packet(self, data: bytes):
+        if len(data) < self.FIXED_HEADER_LEN:
+            raise ValueError(
+                f"IPv6 needs >= {self.FIXED_HEADER_LEN} bytes, got {len(data)}"
+            )
+
         return (
             struct.unpack("!IHBB16s16s", data[: self.FIXED_HEADER_LEN]),
             # options and payload that needs to be processed

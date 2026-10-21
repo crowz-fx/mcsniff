@@ -195,148 +195,153 @@ if __name__ == "__main__":
             pass
 
         if "ETH" in OPTIONS["level2"]:
-            frame = EthernetFrame(unprocessed_data)
-            update_stats("frames")
-            print(frame)
+            try:
+                frame = EthernetFrame(unprocessed_data)
+                update_stats("frames")
+                print(frame)
 
-            # check if it's a ETHER type we can process
-            if frame.ETHER_TYPE in ETHER_TYPES:
+                # check if it's a ETHER type we can process
+                if frame.ETHER_TYPE in ETHER_TYPES:
 
-                # TODO - in payloads, search for things like user:pwds?
+                    # TODO - in payloads, search for things like user:pwds?
 
-                # IPv4
-                if (
-                    frame.ETHER_TYPE == ETHER_TYPES_REVERSED["IPv4"]
-                    and "IPv4" in OPTIONS["level3"]
-                ):
-                    ipv4 = IPv4(frame.PAYLOAD)
-                    update_stats("packets")
-                    update_stats("IPv4")
-                    print_green(ipv4)
-
-                    # TCP
+                    # IPv4
                     if (
-                        ipv4.PROTOCOL == IP_PROTOCOLS_REVERSED["TCP"]
-                        and "TCP" in OPTIONS["level4"]
+                        frame.ETHER_TYPE == ETHER_TYPES_REVERSED["IPv4"]
+                        and "IPv4" in OPTIONS["level3"]
                     ):
-                        update_stats("TCP")
-                        tcp = TCP(ipv4.PAYLOAD)
-                        print_blue(tcp)
-
-                        if tcp.PAYLOAD_LEN > 0:
-                            update_stats("segments")
-
-                            if OPTIONS["https"] or (
-                                tcp.DEST_PORT != 443 and tcp.SRC_PORT != 443
-                            ):
-                                print_payload(tcp.PAYLOAD)
-
-                    # UDP
-                    if (
-                        ipv4.PROTOCOL == IP_PROTOCOLS_REVERSED["UDP"]
-                        and "UDP" in OPTIONS["level4"]
-                    ):
-                        update_stats("UDP")
-                        udp = UDP(ipv4.PAYLOAD)
-                        print_blue(udp)
-
-                        if udp.PAYLOAD_LEN > 0:
-                            update_stats("datagrams")
-                            print_payload(udp.PAYLOAD)
-
-                    # ICMP
-                    if (
-                        ipv4.PROTOCOL == IP_PROTOCOLS_REVERSED["ICMP"]
-                        and "ICMP" in OPTIONS["level3"]
-                    ):
-                        update_stats("ICMP")
-                        icmp = ICMP(ipv4.PAYLOAD)
-                        print_blue(icmp)
-
-                        if icmp.PAYLOAD_LEN > 0:
-                            update_stats("datagrams")
-                            print_payload(icmp.PAYLOAD)
-
-                    # IGMP
-                    if (
-                        ipv4.PROTOCOL == IP_PROTOCOLS_REVERSED["IGMP"]
-                        and "IGMP" in OPTIONS["level3"]
-                    ):
-                        # TODO - implement IGMP
-                        update_stats("IGMP")
+                        ipv4 = IPv4(frame.PAYLOAD)
                         update_stats("packets")
-                        print_blue("|__IGMP > ")
+                        update_stats("IPv4")
+                        print_green(ipv4)
 
-                # TODO - maybe later ARP spoofing?
+                        # TCP
+                        if (
+                            ipv4.PROTOCOL == IP_PROTOCOLS_REVERSED["TCP"]
+                            and "TCP" in OPTIONS["level4"]
+                        ):
+                            update_stats("TCP")
+                            tcp = TCP(ipv4.PAYLOAD)
+                            print_blue(tcp)
 
-                # ARP
-                if (
-                    frame.ETHER_TYPE == ETHER_TYPES_REVERSED["ARP"]
-                    and "ARP" in OPTIONS["level2"]
-                ):
-                    arp = ARP("ARP", frame.PAYLOAD)
-                    update_stats("ARP")
-                    update_stats("packets")
-                    print_green(arp)
-                    print_blue(f"|___PAYLOAD - [{arp.ARP_DESCRIPTION}]")
+                            if tcp.PAYLOAD_LEN > 0:
+                                update_stats("segments")
 
-                # RARP
-                if (
-                    frame.ETHER_TYPE == ETHER_TYPES_REVERSED["RARP"]
-                    and "RARP" in OPTIONS["level2"]
-                ):
-                    # same as ARP but different PTYPE
-                    rarp = ARP("RARP", frame.PAYLOAD)
-                    update_stats("RARP")
-                    update_stats("packets")
-                    print_green(rarp)
+                                if OPTIONS["https"] or (
+                                    tcp.DEST_PORT != 443 and tcp.SRC_PORT != 443
+                                ):
+                                    print_payload(tcp.PAYLOAD)
 
-                # IPv6
-                if (
-                    frame.ETHER_TYPE == ETHER_TYPES_REVERSED["IPv6"]
-                    and "IPv6" in OPTIONS["level3"]
-                ):
-                    update_stats("IPv6")
-                    update_stats("packets")
-                    ipv6 = IPv6(frame.PAYLOAD)
-                    print_green(ipv6)
+                        # UDP
+                        if (
+                            ipv4.PROTOCOL == IP_PROTOCOLS_REVERSED["UDP"]
+                            and "UDP" in OPTIONS["level4"]
+                        ):
+                            update_stats("UDP")
+                            udp = UDP(ipv4.PAYLOAD)
+                            print_blue(udp)
 
-                    # # ICMP
+                            if udp.PAYLOAD_LEN > 0:
+                                update_stats("datagrams")
+                                print_payload(udp.PAYLOAD)
+
+                        # ICMP
+                        if (
+                            ipv4.PROTOCOL == IP_PROTOCOLS_REVERSED["ICMP"]
+                            and "ICMP" in OPTIONS["level3"]
+                        ):
+                            update_stats("ICMP")
+                            icmp = ICMP(ipv4.PAYLOAD)
+                            print_blue(icmp)
+
+                            if icmp.PAYLOAD_LEN > 0:
+                                update_stats("datagrams")
+                                print_payload(icmp.PAYLOAD)
+
+                        # IGMP
+                        if (
+                            ipv4.PROTOCOL == IP_PROTOCOLS_REVERSED["IGMP"]
+                            and "IGMP" in OPTIONS["level3"]
+                        ):
+                            # TODO - implement IGMP
+                            update_stats("IGMP")
+                            update_stats("packets")
+                            print_blue("|__IGMP > ")
+
+                    # TODO - maybe later ARP spoofing?
+
+                    # ARP
                     if (
-                        ipv6.NEXT_HEADER == IP_PROTOCOLS_REVERSED["ICMPv6"]
-                        and "ICMPv6" in OPTIONS["level3"]
+                        frame.ETHER_TYPE == ETHER_TYPES_REVERSED["ARP"]
+                        and "ARP" in OPTIONS["level2"]
                     ):
-                        # TODO - implement ICMPv6
-                        print_blue(f"|__ICMPv6 >")
+                        arp = ARP("ARP", frame.PAYLOAD)
+                        update_stats("ARP")
+                        update_stats("packets")
+                        print_green(arp)
+                        print_blue(f"|___PAYLOAD - [{arp.ARP_DESCRIPTION}]")
 
-                    # TCP
+                    # RARP
                     if (
-                        ipv6.NEXT_HEADER == IP_PROTOCOLS_REVERSED["TCP"]
-                        and "TCP" in OPTIONS["level4"]
+                        frame.ETHER_TYPE == ETHER_TYPES_REVERSED["RARP"]
+                        and "RARP" in OPTIONS["level2"]
                     ):
-                        update_stats("TCP")
-                        tcp = TCP(ipv6.PAYLOAD)
-                        print_blue(tcp)
+                        # same as ARP but different PTYPE
+                        rarp = ARP("RARP", frame.PAYLOAD)
+                        update_stats("RARP")
+                        update_stats("packets")
+                        print_green(rarp)
 
-                        if tcp.PAYLOAD_LEN > 0:
-                            update_stats("segments")
-
-                            if OPTIONS["https"] or (
-                                tcp.DEST_PORT != 443 and tcp.SRC_PORT != 443
-                            ):
-                                print_payload(tcp.PAYLOAD)
-
-                    # UDP
+                    # IPv6
                     if (
-                        ipv6.NEXT_HEADER == IP_PROTOCOLS_REVERSED["UDP"]
-                        and "UDP" in OPTIONS["level4"]
+                        frame.ETHER_TYPE == ETHER_TYPES_REVERSED["IPv6"]
+                        and "IPv6" in OPTIONS["level3"]
                     ):
-                        update_stats("UDP")
-                        udp = UDP(ipv6.PAYLOAD)
-                        print_blue(udp)
+                        update_stats("IPv6")
+                        update_stats("packets")
+                        ipv6 = IPv6(frame.PAYLOAD)
+                        print_green(ipv6)
 
-                        if udp.PAYLOAD_LEN > 0:
-                            update_stats("datagrams")
-                            print_payload(udp.PAYLOAD)
+                        # # ICMP
+                        if (
+                            ipv6.NEXT_HEADER == IP_PROTOCOLS_REVERSED["ICMPv6"]
+                            and "ICMPv6" in OPTIONS["level3"]
+                        ):
+                            # TODO - implement ICMPv6
+                            print_blue(f"|__ICMPv6 >")
+
+                        # TCP
+                        if (
+                            ipv6.NEXT_HEADER == IP_PROTOCOLS_REVERSED["TCP"]
+                            and "TCP" in OPTIONS["level4"]
+                        ):
+                            update_stats("TCP")
+                            tcp = TCP(ipv6.PAYLOAD)
+                            print_blue(tcp)
+
+                            if tcp.PAYLOAD_LEN > 0:
+                                update_stats("segments")
+
+                                if OPTIONS["https"] or (
+                                    tcp.DEST_PORT != 443 and tcp.SRC_PORT != 443
+                                ):
+                                    print_payload(tcp.PAYLOAD)
+
+                        # UDP
+                        if (
+                            ipv6.NEXT_HEADER == IP_PROTOCOLS_REVERSED["UDP"]
+                            and "UDP" in OPTIONS["level4"]
+                        ):
+                            update_stats("UDP")
+                            udp = UDP(ipv6.PAYLOAD)
+                            print_blue(udp)
+
+                            if udp.PAYLOAD_LEN > 0:
+                                update_stats("datagrams")
+                                print_payload(udp.PAYLOAD)
+            except ValueError as error:
+                # truncated/malformed data, skip rest of this frame and keep sniffing
+                print_yellow(f"[!] Skipped malformed frame: {error}")
+                update_stats("malformed")
 
             print()

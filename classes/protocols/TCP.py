@@ -51,6 +51,11 @@ class TCP:
         self.PAYLOAD_LEN = len(self.PAYLOAD)
 
     def process_packet(self, data: bytes):
+        if len(data) < self.PACKET_HEADER_LEN:
+            raise ValueError(
+                f"TCP needs >= {self.PACKET_HEADER_LEN} bytes, got {len(data)}"
+            )
+
         return (
             # strip header into its parts for further processing
             struct.unpack("!HHIIHHHH", data[: self.PACKET_HEADER_LEN]),

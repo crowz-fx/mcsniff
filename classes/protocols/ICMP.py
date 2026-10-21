@@ -21,6 +21,11 @@ class ICMP:
         )
 
     def process_packet(self, data: bytes):
+        if len(data) < self.HEADER_LEN:
+            raise ValueError(
+                f"ICMP needs >= {self.HEADER_LEN} bytes, got {len(data)}"
+            )
+
         return (
             # header
             struct.unpack("!BBH4s", data[: self.HEADER_LEN]),
@@ -34,14 +39,15 @@ class ICMP:
         rest_of_header_formatted = f"{self.REST_OF_HEADER}"
 
         # handle some nice formatting of types and code (if they are mapped)
-        control_message = CONTROL_MESSAGES[self.TYPE]
+        control_message = CONTROL_MESSAGES.get(self.TYPE)
         if control_message:
             # append nice message type description
             type_formatted += ":" + control_message["value"]
 
-            # if the type has subcodes then append to format
-            if "codes" in control_message.keys():
-                code_formatted += ":" + control_message["codes"][self.CODE]
+            # if the type has subcodes then append to format, unmapped show number only
+            code_description = control_message.get("codes", {}).get(self.CODE)
+            if code_description:
+                code_formatted += ":" + code_description
 
             # if echo req/reply
             if self.TYPE == 8 or self.TYPE == 0:
