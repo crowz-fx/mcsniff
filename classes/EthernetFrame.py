@@ -25,8 +25,8 @@ class EthernetFrame:
             # first bytes is the header, split into tuple
             struct.unpack("!6s6sH", data[: self.FRAME_HEADER_LEN]),
             # after the header the rest of the data is the payload in the frame,
-            # sockets library automagically removes the checksum and the 0x00
-            # padding to the end (if < min size of 46 bytes)
+            # the checksum (FCS) is already stripped but any 0x00 padding to the
+            # min size of 46 bytes is kept, the IP layer trims it using its length
             data[self.FRAME_HEADER_LEN :],
         )
 

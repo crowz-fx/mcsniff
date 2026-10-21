@@ -22,6 +22,10 @@ class IPv6:
             self.DEST_IP_RAW,
         ), self.PAYLOAD = self.process_packet(data)
 
+        # payload length marks the real end of the packet, anything after it is ethernet
+        # padding, if fewer bytes arrived than it claims the slice keeps what we have
+        self.PAYLOAD = self.PAYLOAD[: self.PAYLOAD_LEN]
+
         # process the VERSION, TRAFFIC_CLASS and FLOW_LABEL fields
         # 4 bytes = version (4 bits), traffic class (8 bits), flow label (20 bits)
         self.VERSION = self.VERSION_TRAFFIC_FLOW_RAW >> 28

@@ -45,9 +45,19 @@ class IPv4:
 
         # TODO - should maybe catch if options is too big or can that never happen?
 
+        header_len = self.HEADER_REQUIRED_LEN + self.HEADER_OPTIONS_LEN
+        if self.LENGTH < header_len:
+            raise ValueError(
+                f"IPv4 total length {self.LENGTH} is smaller than its header {header_len}"
+            )
+
+        # total length marks the real end of the packet, anything after it is ethernet
+        # padding, if fewer bytes arrived than it claims the slice keeps what we have
+        packet_end = self.LENGTH - self.HEADER_REQUIRED_LEN
+
         # now we know options length (usually 0), now we know where the payload starts
         self.OPTIONS = PACKET_UNPROCESSED_DATA[: self.HEADER_OPTIONS_LEN]
-        self.PAYLOAD = PACKET_UNPROCESSED_DATA[self.HEADER_OPTIONS_LEN :]
+        self.PAYLOAD = PACKET_UNPROCESSED_DATA[self.HEADER_OPTIONS_LEN : packet_end]
         self.PAYLOAD_LEN = len(self.PAYLOAD)
 
     def process_packet(self, data: bytes):
