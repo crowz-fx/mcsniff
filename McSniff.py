@@ -228,157 +228,154 @@ if __name__ == "__main__":
                 print(frame)
 
                 # check if it's a ETHER type we can process
-                if frame.ETHER_TYPE in ETHER_TYPES:
+                if frame.ether_type in ETHER_TYPES:
 
                     # TODO - in payloads, search for things like user:pwds?
 
                     # IPv4
                     if (
-                        frame.ETHER_TYPE == ETHER_TYPES_REVERSED["IPv4"]
+                        frame.ether_type == ETHER_TYPES_REVERSED["IPv4"]
                         and "IPv4" in OPTIONS["level3"]
                     ):
-                        ipv4 = IPv4(frame.PAYLOAD)
+                        ipv4 = IPv4(frame.payload)
                         update_stats("packets")
                         update_stats("IPv4")
                         print_green(ipv4)
 
                         # only the first fragment carries the transport header, later
                         # ones are the middle of a payload so can't be parsed alone
-                        if ipv4.OFFSET > 0:
+                        if ipv4.offset > 0:
                             # offset is counted in 8 byte units
-                            offset_in_bytes = ipv4.OFFSET * 8
+                            offset_in_bytes = ipv4.offset * 8
                             print_blue(
                                 "|__Fragment > "
-                                + f"Offset=[{ipv4.OFFSET}:{offset_in_bytes} bytes] "
+                                + f"Offset=[{ipv4.offset}:{offset_in_bytes} bytes] "
                                 + "no transport header, not parsed"
                             )
 
                         # TCP
                         elif (
-                            ipv4.PROTOCOL == IP_PROTOCOLS_REVERSED["TCP"]
+                            ipv4.protocol == IP_PROTOCOLS_REVERSED["TCP"]
                             and "TCP" in OPTIONS["level4"]
                         ):
                             update_stats("TCP")
-                            tcp = TCP(ipv4.PAYLOAD)
+                            tcp = TCP(ipv4.payload)
                             print_blue(tcp)
 
-                            if tcp.PAYLOAD_LEN > 0:
+                            if tcp.payload_len > 0:
                                 update_stats("segments")
 
-                                if should_dump_payload(tcp.SRC_PORT, tcp.DEST_PORT):
-                                    print_payload(tcp.RAW_PAYLOAD)
+                                if should_dump_payload(tcp.src_port, tcp.dest_port):
+                                    print_payload(tcp.payload)
 
                         # UDP
                         elif (
-                            ipv4.PROTOCOL == IP_PROTOCOLS_REVERSED["UDP"]
+                            ipv4.protocol == IP_PROTOCOLS_REVERSED["UDP"]
                             and "UDP" in OPTIONS["level4"]
                         ):
                             update_stats("UDP")
-                            udp = UDP(ipv4.PAYLOAD)
+                            udp = UDP(ipv4.payload)
                             print_blue(udp)
 
-                            if udp.PAYLOAD_LEN > 0:
+                            if udp.payload_len > 0:
                                 update_stats("datagrams")
 
-                                if should_dump_payload(udp.SRC_PORT, udp.DEST_PORT):
-                                    print_payload(udp.RAW_PAYLOAD)
+                                if should_dump_payload(udp.src_port, udp.dest_port):
+                                    print_payload(udp.payload)
 
                         # ICMP
                         elif (
-                            ipv4.PROTOCOL == IP_PROTOCOLS_REVERSED["ICMP"]
+                            ipv4.protocol == IP_PROTOCOLS_REVERSED["ICMP"]
                             and "ICMP" in OPTIONS["level3"]
                         ):
                             update_stats("ICMP")
-                            icmp = ICMP(ipv4.PAYLOAD)
+                            icmp = ICMP(ipv4.payload)
                             print_blue(icmp)
 
-                            if icmp.PAYLOAD_LEN > 0:
-                                update_stats("datagrams")
-
-                                if should_dump_payload():
-                                    print_payload(icmp.RAW_PAYLOAD)
+                            if icmp.payload_len > 0 and should_dump_payload():
+                                print_payload(icmp.payload)
 
                         # IGMP
                         elif (
-                            ipv4.PROTOCOL == IP_PROTOCOLS_REVERSED["IGMP"]
+                            ipv4.protocol == IP_PROTOCOLS_REVERSED["IGMP"]
                             and "IGMP" in OPTIONS["level3"]
                         ):
                             # TODO - implement IGMP
                             update_stats("IGMP")
-                            update_stats("packets")
                             print_blue("|__IGMP > ")
 
                     # TODO - maybe later ARP spoofing?
 
                     # ARP
                     if (
-                        frame.ETHER_TYPE == ETHER_TYPES_REVERSED["ARP"]
+                        frame.ether_type == ETHER_TYPES_REVERSED["ARP"]
                         and "ARP" in OPTIONS["level2"]
                     ):
-                        arp = ARP("ARP", frame.PAYLOAD)
+                        arp = ARP("ARP", frame.payload)
                         update_stats("ARP")
                         update_stats("packets")
                         print_green(arp)
-                        print_blue(f"|___PAYLOAD - [{arp.ARP_DESCRIPTION}]")
+                        print_blue(f"|___PAYLOAD - [{arp.arp_description}]")
 
                     # RARP
                     if (
-                        frame.ETHER_TYPE == ETHER_TYPES_REVERSED["RARP"]
+                        frame.ether_type == ETHER_TYPES_REVERSED["RARP"]
                         and "RARP" in OPTIONS["level2"]
                     ):
                         # same as ARP but different PTYPE
-                        rarp = ARP("RARP", frame.PAYLOAD)
+                        rarp = ARP("RARP", frame.payload)
                         update_stats("RARP")
                         update_stats("packets")
                         print_green(rarp)
 
                     # IPv6
                     if (
-                        frame.ETHER_TYPE == ETHER_TYPES_REVERSED["IPv6"]
+                        frame.ether_type == ETHER_TYPES_REVERSED["IPv6"]
                         and "IPv6" in OPTIONS["level3"]
                     ):
                         update_stats("IPv6")
                         update_stats("packets")
-                        ipv6 = IPv6(frame.PAYLOAD)
+                        ipv6 = IPv6(frame.payload)
                         print_green(ipv6)
 
                         # # ICMP
                         if (
-                            ipv6.NEXT_HEADER == IP_PROTOCOLS_REVERSED["ICMPv6"]
+                            ipv6.next_header == IP_PROTOCOLS_REVERSED["ICMPv6"]
                             and "ICMPv6" in OPTIONS["level3"]
                         ):
                             # TODO - implement ICMPv6
+                            update_stats("ICMPv6")
                             print_blue(f"|__ICMPv6 >")
 
                         # TCP
                         if (
-                            ipv6.NEXT_HEADER == IP_PROTOCOLS_REVERSED["TCP"]
+                            ipv6.next_header == IP_PROTOCOLS_REVERSED["TCP"]
                             and "TCP" in OPTIONS["level4"]
                         ):
                             update_stats("TCP")
-                            tcp = TCP(ipv6.PAYLOAD)
+                            tcp = TCP(ipv6.payload)
                             print_blue(tcp)
 
-                            if tcp.PAYLOAD_LEN > 0:
+                            if tcp.payload_len > 0:
                                 update_stats("segments")
 
-                                if should_dump_payload(tcp.SRC_PORT, tcp.DEST_PORT):
-                                    print_payload(tcp.RAW_PAYLOAD)
+                                if should_dump_payload(tcp.src_port, tcp.dest_port):
+                                    print_payload(tcp.payload)
 
                         # UDP
                         if (
-                            ipv6.NEXT_HEADER == IP_PROTOCOLS_REVERSED["UDP"]
+                            ipv6.next_header == IP_PROTOCOLS_REVERSED["UDP"]
                             and "UDP" in OPTIONS["level4"]
                         ):
                             update_stats("UDP")
-                            udp = UDP(ipv6.PAYLOAD)
+                            udp = UDP(ipv6.payload)
                             print_blue(udp)
 
-                            if udp.PAYLOAD_LEN > 0:
+                            if udp.payload_len > 0:
                                 update_stats("datagrams")
 
-                                if should_dump_payload(udp.SRC_PORT, udp.DEST_PORT):
-                                    print_payload(udp.RAW_PAYLOAD)
+                                if should_dump_payload(udp.src_port, udp.dest_port):
+                                    print_payload(udp.payload)
             except ValueError as error:
                 # truncated/malformed data, skip rest of this frame and keep sniffing
                 print_yellow(f"[!] Skipped malformed frame: {error}")

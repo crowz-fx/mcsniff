@@ -25,72 +25,72 @@ class ARP:
     MAX_HEADER_LEN = 28
 
     def __init__(self, arp_type: str, data: bytes) -> None:
-        self.ARP_TYPE = arp_type
+        self.arp_type = arp_type
         (
-            self.HARDWARE_TYPE,
-            self.PROTOCOL_TYPE,
-            self.HARDWARE_ADDR_LEN,
-            self.PROTOCOL_ADDR_LEN,
-            self.OPERATION,
-        ), UNPROCESSED_HEADER = self.process_packet(data)
+            self.hardware_type,
+            self.protocol_type,
+            self.hardware_addr_len,
+            self.protocol_addr_len,
+            self.operation,
+        ), unprocessed_header = self.process_packet(data)
 
         # determine if possible, what type of ARP, set before branch so always exists
-        self.ARP_DESCRIPTION = "ARP:Unknown"
+        self.arp_description = "ARP:Unknown"
 
         # only process IPv4 over Ethernet ARP messages
-        if self.HARDWARE_ADDR_LEN != 6 or self.PROTOCOL_ADDR_LEN != 4:
+        if self.hardware_addr_len != 6 or self.protocol_addr_len != 4:
             (
-                self.SENDER_HARDWARE_ADDR,
-                self.SENDER_PROTOCOL_ADDR,
-                self.TARGET_HARDWARE_ADDR,
-                self.TARGET_PROTOCOL_ADDR,
+                self.sender_hardware_addr,
+                self.sender_protocol_addr,
+                self.target_hardware_addr,
+                self.target_protocol_addr,
             ) = (None, None, None, None)
         else:
             addresses_len = self.MAX_HEADER_LEN - self.FIXED_HEADER_LEN
-            if len(UNPROCESSED_HEADER) < addresses_len:
+            if len(unprocessed_header) < addresses_len:
                 raise ValueError(
-                    f"{self.ARP_TYPE} addresses need >= {addresses_len} bytes, "
-                    + f"got {len(UNPROCESSED_HEADER)}"
+                    f"{self.arp_type} addresses need >= {addresses_len} bytes, "
+                    + f"got {len(unprocessed_header)}"
                 )
 
             (
-                self.SENDER_HARDWARE_ADDR_RAW,
-                self.SENDER_PROTOCOL_ADDR_RAW,
-                self.TARGET_HARDWARE_ADDR_RAW,
-                self.TARGET_PROTOCOL_ADDR_RAW,
+                self.sender_hardware_addr_raw,
+                self.sender_protocol_addr_raw,
+                self.target_hardware_addr_raw,
+                self.target_protocol_addr_raw,
             ) = struct.unpack(
                 "!6s4s6s4s",
-                UNPROCESSED_HEADER[:addresses_len],
+                unprocessed_header[:addresses_len],
             )
 
-            self.SENDER_HARDWARE_ADDR = format_mac(self.SENDER_HARDWARE_ADDR_RAW)
-            self.SENDER_PROTOCOL_ADDR = format_ipv4(self.SENDER_PROTOCOL_ADDR_RAW)
-            self.TARGET_HARDWARE_ADDR = format_mac(self.TARGET_HARDWARE_ADDR_RAW)
-            self.TARGET_PROTOCOL_ADDR = format_ipv4(self.TARGET_PROTOCOL_ADDR_RAW)
+            self.sender_hardware_addr = format_mac(self.sender_hardware_addr_raw)
+            self.sender_protocol_addr = format_ipv4(self.sender_protocol_addr_raw)
+            self.target_hardware_addr = format_mac(self.target_hardware_addr_raw)
+            self.target_protocol_addr = format_ipv4(self.target_protocol_addr_raw)
 
-            if self.OPERATION == 1:
-                if self.TARGET_HARDWARE_ADDR == "00:00:00:00:00:00":
-                    if self.SENDER_PROTOCOL_ADDR == self.TARGET_PROTOCOL_ADDR:
-                        self.ARP_DESCRIPTION = "ARP:Announcement"
-                    elif self.SENDER_PROTOCOL_ADDR == "0.0.0.0":
-                        self.ARP_DESCRIPTION = "ARP:Probe"
+            if self.operation == 1:
+                if self.target_hardware_addr == "00:00:00:00:00:00":
+                    if self.sender_protocol_addr == self.target_protocol_addr:
+                        self.arp_description = "ARP:Announcement"
+                    elif self.sender_protocol_addr == "0.0.0.0":
+                        self.arp_description = "ARP:Probe"
                     else:
-                        self.ARP_DESCRIPTION = "ARP:Request"
+                        self.arp_description = "ARP:Request"
                 else:
-                    self.ARP_DESCRIPTION = "ARP:Request"
-            elif self.OPERATION == 2:
+                    self.arp_description = "ARP:Request"
+            elif self.operation == 2:
                 if (
-                    self.SENDER_PROTOCOL_ADDR == self.TARGET_PROTOCOL_ADDR
-                    and self.TARGET_HARDWARE_ADDR == "00:00:00:00:00:00"
+                    self.sender_protocol_addr == self.target_protocol_addr
+                    and self.target_hardware_addr == "00:00:00:00:00:00"
                 ):
-                    self.ARP_DESCRIPTION = "ARP:Gratuitous"
+                    self.arp_description = "ARP:Gratuitous"
                 else:
-                    self.ARP_DESCRIPTION = "ARP:Reply"
+                    self.arp_description = "ARP:Reply"
 
     def process_packet(self, data: bytes):
         if len(data) < self.FIXED_HEADER_LEN:
             raise ValueError(
-                f"{self.ARP_TYPE} needs >= {self.FIXED_HEADER_LEN} bytes, got {len(data)}"
+                f"{self.arp_type} needs >= {self.FIXED_HEADER_LEN} bytes, got {len(data)}"
             )
 
         return (
@@ -100,30 +100,30 @@ class ARP:
 
     def __str__(self) -> str:
         # yes the space for formatting in ARP
-        arp_type_formatted = " ARP" if self.ARP_TYPE == "ARP" else "RARP"
+        arp_type_formatted = " ARP" if self.arp_type == "ARP" else "RARP"
 
-        hardware_type_formatted = str(self.HARDWARE_TYPE)
-        if self.HARDWARE_TYPE == 1:
+        hardware_type_formatted = str(self.hardware_type)
+        if self.hardware_type == 1:
             hardware_type_formatted += ":Eth"
 
-        protocol_type_formatted = str(self.PROTOCOL_TYPE)
+        protocol_type_formatted = str(self.protocol_type)
 
-        if self.PROTOCOL_TYPE in ETHER_TYPES:
-            protocol_type_formatted += ":" + str(ETHER_TYPES[self.PROTOCOL_TYPE])
+        if self.protocol_type in ETHER_TYPES:
+            protocol_type_formatted += ":" + str(ETHER_TYPES[self.protocol_type])
 
-        operation_formatted = str(self.OPERATION)
-        if self.OPERATION in ARP_OPERATIONS:
-            operation_formatted += ":" + ARP_OPERATIONS[self.OPERATION]
+        operation_formatted = str(self.operation)
+        if self.operation in ARP_OPERATIONS:
+            operation_formatted += ":" + ARP_OPERATIONS[self.operation]
 
         return (
             f"|_{arp_type_formatted} > "
             + f"HardwareType=[{hardware_type_formatted}] "
             + f"ProtocolType=[{protocol_type_formatted}] "
-            + f"HardwareAddrLen=[{self.HARDWARE_ADDR_LEN}] "
-            + f"ProtocolAddrLen=[{self.PROTOCOL_ADDR_LEN}] "
+            + f"HardwareAddrLen=[{self.hardware_addr_len}] "
+            + f"ProtocolAddrLen=[{self.protocol_addr_len}] "
             + f"Operation=[{operation_formatted}] "
-            + f"SenderHardwareAddr=[{self.SENDER_HARDWARE_ADDR}] "
-            + f"SenderProtocolAddr=[{self.SENDER_PROTOCOL_ADDR}] "
-            + f"TargetHardwareAddr=[{self.TARGET_HARDWARE_ADDR}] "
-            + f"TargetProtocolAddr=[{self.TARGET_PROTOCOL_ADDR}] "
+            + f"SenderHardwareAddr=[{self.sender_hardware_addr}] "
+            + f"SenderProtocolAddr=[{self.sender_protocol_addr}] "
+            + f"TargetHardwareAddr=[{self.target_hardware_addr}] "
+            + f"TargetProtocolAddr=[{self.target_protocol_addr}] "
         )

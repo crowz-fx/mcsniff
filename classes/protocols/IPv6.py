@@ -14,26 +14,26 @@ class IPv6:
 
     def __init__(self, data: bytes) -> None:
         (
-            self.VERSION_TRAFFIC_FLOW_RAW,
-            self.PAYLOAD_LEN,
-            self.NEXT_HEADER,
-            self.HOP_LIMIT,
-            self.SRC_IP_RAW,
-            self.DEST_IP_RAW,
-        ), self.PAYLOAD = self.process_packet(data)
+            self.version_traffic_flow_raw,
+            self.payload_len,
+            self.next_header,
+            self.hop_limit,
+            self.src_ip_raw,
+            self.dest_ip_raw,
+        ), self.payload = self.process_packet(data)
 
         # payload length marks the real end of the packet, anything after it is ethernet
         # padding, if fewer bytes arrived than it claims the slice keeps what we have
-        self.PAYLOAD = self.PAYLOAD[: self.PAYLOAD_LEN]
+        self.payload = self.payload[: self.payload_len]
 
-        # process the VERSION, TRAFFIC_CLASS and FLOW_LABEL fields
+        # process the version, traffic class and flow label fields
         # 4 bytes = version (4 bits), traffic class (8 bits), flow label (20 bits)
-        self.VERSION = self.VERSION_TRAFFIC_FLOW_RAW >> 28
-        self.TRAFFIC_CLASS = (self.VERSION_TRAFFIC_FLOW_RAW >> 20) & 0xFF
-        self.FLOW_LABEL = self.VERSION_TRAFFIC_FLOW_RAW & 0xFFFFF
+        self.version = self.version_traffic_flow_raw >> 28
+        self.traffic_class = (self.version_traffic_flow_raw >> 20) & 0xFF
+        self.flow_label = self.version_traffic_flow_raw & 0xFFFFF
 
-        self.SRC_IP = format_ipv6(self.SRC_IP_RAW)
-        self.DEST_IP = format_ipv6(self.DEST_IP_RAW)
+        self.src_ip = format_ipv6(self.src_ip_raw)
+        self.dest_ip = format_ipv6(self.dest_ip_raw)
 
     def process_packet(self, data: bytes):
         if len(data) < self.FIXED_HEADER_LEN:
@@ -49,18 +49,18 @@ class IPv6:
 
     def __str__(self) -> str:
         # handle some nice formatting in the output plus descriptions
-        next_header_formatted = hex(self.NEXT_HEADER)
+        next_header_formatted = hex(self.next_header)
 
-        if self.NEXT_HEADER in IP_PROTOCOLS:
+        if self.next_header in IP_PROTOCOLS:
             next_header_formatted = (
-                next_header_formatted + ":" + IP_PROTOCOLS[self.NEXT_HEADER]
+                next_header_formatted + ":" + IP_PROTOCOLS[self.next_header]
             )
 
         return (
             f"|_IPv6 > "
             + f"NextHeader=[{next_header_formatted}] "
-            + f"SourceIP=[{self.SRC_IP}] "
-            + f"DestinationIP=[{self.DEST_IP}] "
-            + f"HopLimit=[{self.HOP_LIMIT}] "
-            + f"PayloadLen=[{self.PAYLOAD_LEN}] "
+            + f"SourceIP=[{self.src_ip}] "
+            + f"DestinationIP=[{self.dest_ip}] "
+            + f"HopLimit=[{self.hop_limit}] "
+            + f"PayloadLen=[{self.payload_len}] "
         )

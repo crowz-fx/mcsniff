@@ -10,11 +10,11 @@ class ICMP:
     HEADER_LEN = 8
 
     def __init__(self, data: bytes) -> None:
-        self.PACKET_HEADER, self.RAW_PAYLOAD = self.process_packet(data)
-        self.TYPE, self.CODE, self.CHECKSUM, self.REST_OF_HEADER = self.PACKET_HEADER
+        self.packet_header, self.payload = self.process_packet(data)
+        self.type, self.code, self.checksum, self.rest_of_header = self.packet_header
 
-        self.PAYLOAD_LEN = len(self.RAW_PAYLOAD)
-        self.PAYLOAD_INFO = (
+        self.payload_len = len(self.payload)
+        self.payload_info = (
             "Typically random chars or if error then the IPv4/6 that caused it"
         )
 
@@ -30,25 +30,25 @@ class ICMP:
         )
 
     def __str__(self) -> str:
-        type_formatted = f"{self.TYPE}"
-        code_formatted = f"{self.CODE}"
-        rest_of_header_formatted = f"{self.REST_OF_HEADER}"
+        type_formatted = f"{self.type}"
+        code_formatted = f"{self.code}"
+        rest_of_header_formatted = f"{self.rest_of_header}"
 
         # handle some nice formatting of types and code (if they are mapped)
-        control_message = CONTROL_MESSAGES.get(self.TYPE)
+        control_message = CONTROL_MESSAGES.get(self.type)
         if control_message:
             # append nice message type description
             type_formatted += ":" + control_message["value"]
 
             # if the type has subcodes then append to format, unmapped show number only
-            code_description = control_message.get("codes", {}).get(self.CODE)
+            code_description = control_message.get("codes", {}).get(self.code)
             if code_description:
                 code_formatted += ":" + code_description
 
             # if echo req/reply
-            if self.TYPE == 8 or self.TYPE == 0:
+            if self.type == 8 or self.type == 0:
                 # rest of header for these are broken into identifier (2), seq num (2)
-                rest_of_header_unpacked = struct.unpack("!HH", self.REST_OF_HEADER)
+                rest_of_header_unpacked = struct.unpack("!HH", self.rest_of_header)
                 rest_of_header_formatted = (
                     "Identifier:"
                     + str(rest_of_header_unpacked[0])
@@ -63,6 +63,6 @@ class ICMP:
             f"|_ICMP > "
             + f"Type=[{type_formatted}] "
             + f"Code=[{code_formatted}] "
-            + f"CheckSum=[{self.CHECKSUM}] "
+            + f"CheckSum=[{self.checksum}] "
             + f"RestOfHeader=[{rest_of_header_formatted}] "
         )

@@ -8,9 +8,9 @@ class UDP:
     PACKET_HEADER_LEN = 8
 
     def __init__(self, data: bytes) -> None:
-        self.PACKET_HEADER, self.RAW_PAYLOAD = self.process_packet(data)
-        self.SRC_PORT, self.DEST_PORT, self.LENGTH, self.CHECKSUM = self.PACKET_HEADER
-        self.PAYLOAD_LEN = len(self.RAW_PAYLOAD)
+        self.packet_header, self.payload = self.process_packet(data)
+        self.src_port, self.dest_port, self.length, self.checksum = self.packet_header
+        self.payload_len = len(self.payload)
 
     def process_packet(self, data: bytes):
         if len(data) < self.PACKET_HEADER_LEN:
@@ -28,8 +28,8 @@ class UDP:
     def __str__(self) -> str:
         return (
             f"|__UDP > "
-            + f"SourcePort=[{self.SRC_PORT}] "
-            + f"DestinationPort=[{self.DEST_PORT}] "
-            + f"Checksum=[{self.CHECKSUM}] "
-            + f"PayloadLen=[{self.PAYLOAD_LEN}] "
+            + f"SourcePort=[{self.src_port}] "
+            + f"DestinationPort=[{self.dest_port}] "
+            + f"Checksum=[{self.checksum}] "
+            + f"PayloadLen=[{self.payload_len}] "
         )

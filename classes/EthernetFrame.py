@@ -11,9 +11,9 @@ class EthernetFrame:
     FRAME_HEADER_LEN = 14
 
     def __init__(self, data: bytes) -> None:
-        self.FRAME_HEADER, self.PAYLOAD = self.process_frame(data)
-        self.DEST_MAC, self.SRC_MAC, self.ETHER_TYPE = self.FRAME_HEADER
-        self.PAYLOAD_LEN = len(self.PAYLOAD)
+        self.frame_header, self.payload = self.process_frame(data)
+        self.dest_mac, self.src_mac, self.ether_type = self.frame_header
+        self.payload_len = len(self.payload)
 
     def process_frame(self, data: bytes):
         if len(data) < self.FRAME_HEADER_LEN:
@@ -32,15 +32,15 @@ class EthernetFrame:
 
     def __str__(self) -> str:
         # handle some nice formatting in the output plus descriptions
-        ethertype_formatted = hex(self.ETHER_TYPE)
-        if self.ETHER_TYPE in ETHER_TYPES:
+        ethertype_formatted = hex(self.ether_type)
+        if self.ether_type in ETHER_TYPES:
             ethertype_formatted = (
-                ethertype_formatted + ":" + ETHER_TYPES[self.ETHER_TYPE]
+                ethertype_formatted + ":" + ETHER_TYPES[self.ether_type]
             )
 
         return (
             f"|Frame > "
-            + f"SourceMAC=[{format_mac(self.SRC_MAC)}] "
-            + f"DestinationMAC=[{format_mac(self.DEST_MAC)}] "
+            + f"SourceMAC=[{format_mac(self.src_mac)}] "
+            + f"DestinationMAC=[{format_mac(self.dest_mac)}] "
             + f"EtherType=[{ethertype_formatted}] "
         )
