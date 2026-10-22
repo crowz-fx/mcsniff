@@ -3,7 +3,6 @@
 import struct
 
 from classes.constants.ControlMessages import CONTROL_MESSAGES
-from classes.utils.Formatters import format_payload
 
 
 class ICMP:
@@ -14,7 +13,6 @@ class ICMP:
         self.PACKET_HEADER, self.RAW_PAYLOAD = self.process_packet(data)
         self.TYPE, self.CODE, self.CHECKSUM, self.REST_OF_HEADER = self.PACKET_HEADER
 
-        self.PAYLOAD = format_payload(self.RAW_PAYLOAD)
         self.PAYLOAD_LEN = len(self.RAW_PAYLOAD)
         self.PAYLOAD_INFO = (
             "Typically random chars or if error then the IPv4/6 that caused it"
@@ -22,9 +20,7 @@ class ICMP:
 
     def process_packet(self, data: bytes):
         if len(data) < self.HEADER_LEN:
-            raise ValueError(
-                f"ICMP needs >= {self.HEADER_LEN} bytes, got {len(data)}"
-            )
+            raise ValueError(f"ICMP needs >= {self.HEADER_LEN} bytes, got {len(data)}")
 
         return (
             # header

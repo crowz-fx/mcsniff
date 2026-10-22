@@ -126,6 +126,13 @@ if __name__ == "__main__":
         required=False,
     )
     args_parser.add_argument(
+        "-x",
+        "--hex",
+        help="dump payload output as a hex dump, implies -p",
+        action="store_true",
+        required=False,
+    )
+    args_parser.add_argument(
         "-s",
         "--stats",
         help="enable and show statistics for what's been processed",
@@ -167,7 +174,9 @@ if __name__ == "__main__":
 
     args = args_parser.parse_args()
     OPTIONS["interface"] = args.interface
-    OPTIONS["payload"] = args.payload
+    # asking for a hex dump only makes sense if payloads are being dumped
+    OPTIONS["payload"] = args.payload or args.hex
+    OPTIONS["hex"] = args.hex
     OPTIONS["statistics"] = args.stats
     OPTIONS["https"] = args.https
 
@@ -189,6 +198,7 @@ if __name__ == "__main__":
         + f"interface=[{OPTIONS['interface']}] "
         + f"enableStatistics=[{OPTIONS['statistics']}] "
         + f"showPayload=[{OPTIONS['payload']}] "
+        + f"showPayloadAsHex=[{OPTIONS['hex']}] "
         + f"show443InPayload=[{OPTIONS['https']}] "
     )
     print_yellow(
@@ -256,7 +266,7 @@ if __name__ == "__main__":
                                 update_stats("segments")
 
                                 if should_dump_payload(tcp.SRC_PORT, tcp.DEST_PORT):
-                                    print_payload(tcp.PAYLOAD)
+                                    print_payload(tcp.RAW_PAYLOAD)
 
                         # UDP
                         elif (
@@ -271,7 +281,7 @@ if __name__ == "__main__":
                                 update_stats("datagrams")
 
                                 if should_dump_payload(udp.SRC_PORT, udp.DEST_PORT):
-                                    print_payload(udp.PAYLOAD)
+                                    print_payload(udp.RAW_PAYLOAD)
 
                         # ICMP
                         elif (
@@ -286,7 +296,7 @@ if __name__ == "__main__":
                                 update_stats("datagrams")
 
                                 if should_dump_payload():
-                                    print_payload(icmp.PAYLOAD)
+                                    print_payload(icmp.RAW_PAYLOAD)
 
                         # IGMP
                         elif (
@@ -353,7 +363,7 @@ if __name__ == "__main__":
                                 update_stats("segments")
 
                                 if should_dump_payload(tcp.SRC_PORT, tcp.DEST_PORT):
-                                    print_payload(tcp.PAYLOAD)
+                                    print_payload(tcp.RAW_PAYLOAD)
 
                         # UDP
                         if (
@@ -368,7 +378,7 @@ if __name__ == "__main__":
                                 update_stats("datagrams")
 
                                 if should_dump_payload(udp.SRC_PORT, udp.DEST_PORT):
-                                    print_payload(udp.PAYLOAD)
+                                    print_payload(udp.RAW_PAYLOAD)
             except ValueError as error:
                 # truncated/malformed data, skip rest of this frame and keep sniffing
                 print_yellow(f"[!] Skipped malformed frame: {error}")

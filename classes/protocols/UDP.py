@@ -2,8 +2,6 @@
 
 import struct
 
-from classes.utils.Formatters import format_payload
-
 
 class UDP:
     # 8 = src port (2), dest port (2), length (2), checksum (2)
@@ -13,7 +11,6 @@ class UDP:
         self.PACKET_HEADER, self.RAW_PAYLOAD = self.process_packet(data)
         self.SRC_PORT, self.DEST_PORT, self.LENGTH, self.CHECKSUM = self.PACKET_HEADER
         self.PAYLOAD_LEN = len(self.RAW_PAYLOAD)
-        self.PAYLOAD = format_payload(self.RAW_PAYLOAD)
 
     def process_packet(self, data: bytes):
         if len(data) < self.PACKET_HEADER_LEN:

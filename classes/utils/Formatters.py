@@ -1,6 +1,10 @@
 import struct
 
+from classes.State import OPTIONS
 from classes.constants.ColourChars import BLUE, END, GREEN, YELLOW
+
+
+HEX_DUMP_BYTES_PER_LINE = 16
 
 
 def format_mac(data: bytes) -> str:
@@ -13,8 +17,8 @@ def format_ipv4(data: bytes) -> str:
     return ".".join(format(b, "d") for b in data)
 
 
+# i know this is dodgy and i could have used a library, but where's the fun in that!
 def format_ipv6(data: bytes) -> str:
-    # i know this is dodgy and i could have used a library, but where's the fun in that!
 
     # 8 groups of 16 bits, x = lower case hex with no leading 0's (RFC 5952)
     groups = [format(group, "x") for group in struct.unpack("!8H", data)]
@@ -49,18 +53,44 @@ def find_longest_zero_run(groups: list[str]) -> tuple[int, int]:
     return longest_start, longest_len
 
 
-# printable ASCII plus newline/tab so text protocols like HTTP stay readable,
-# everything else becomes '.' so payload bytes can never drive the terminal
+# anything outside this range becomes '.' so payload bytes dont mess with the terminal
+def is_printable_ascii(byte: int) -> bool:
+    return 0x20 <= byte <= 0x7E
+
+
+# newline/tab kept on top of printable ASCII so text protocols like HTTP stay readable
 def format_payload(data: bytes) -> str:
     return "".join(
-        chr(b) if 0x20 <= b <= 0x7E or b in (0x0A, 0x09) else "." for b in data
+        chr(b) if is_printable_ascii(b) or b in (0x0A, 0x09) else "." for b in data
     )
 
 
-def print_payload(payload: str):
+# xxd style, offset | 16 bytes of hex split 8+8 | ascii, newline/tab are
+# not kept in the ascii column so every line stays the same width
+def format_hex_dump(data: bytes) -> str:
+    lines = []
+
+    for offset in range(0, len(data), HEX_DUMP_BYTES_PER_LINE):
+        chunk = data[offset : offset + HEX_DUMP_BYTES_PER_LINE]
+
+        hex_bytes = [format(b, "02x") for b in chunk]
+        # pad a short last line so its ascii column lines up with the ones above
+        hex_bytes += ["  "] * (HEX_DUMP_BYTES_PER_LINE - len(chunk))
+        hex_column = " ".join(hex_bytes[:8]) + "  " + " ".join(hex_bytes[8:])
+
+        ascii_column = "".join(chr(b) if is_printable_ascii(b) else "." for b in chunk)
+
+        lines.append(f"{offset:04x}  {hex_column}  |{ascii_column}|")
+
+    return "\n".join(lines)
+
+
+def print_payload(data: bytes):
+    formatted = format_hex_dump(data) if OPTIONS["hex"] else format_payload(data)
+
     print_blue("|___PAYLOAD")
     print_blue("       -------")
-    print_blue(payload)
+    print_blue(formatted)
     print_blue("       -------")
 
 

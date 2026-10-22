@@ -47,7 +47,7 @@ sudo python McSniff.py eth0
 Using the `-h` flag will output the below for all options and params that can be supplied
 ```
 ~ sudo python McSniff.py -h
-usage: McSniff.py [-h] [-p] [-s] [-t] [-2 [{ETH,ARP,RARP} ...]] [-3 [{IPv4,IPv6,ICMP,ICMPv6,IGMP} ...]] [-4 [{TCP,UDP} ...]] interface
+usage: McSniff.py [-h] [-p] [-x] [-s] [-t] [-2 [{ETH,ARP,RARP} ...]] [-3 [{IPv4,IPv6,ICMP,ICMPv6,IGMP} ...]] [-4 [{TCP,UDP} ...]] interface
 
 Network analyser (packet sniffer)... for you know, research purposes ;)
 
@@ -57,6 +57,7 @@ positional arguments:
 options:
   -h, --help            show this help message and exit
   -p, --payload         dump payload output
+  -x, --hex             dump payload output as a hex dump, implies -p
   -s, --stats           enable and show statistics for what's been processed
   -t, --https           include dumps even for 443 port payloads (encrypted traffic)
   -2 [{ETH,ARP,RARP} ...], --level2 [{ETH,ARP,RARP} ...]
@@ -84,6 +85,22 @@ sudo python McSniff.py eth0 -2 ETH -3 IPv4 IPv6
 #### Capture only IPv6 UDP packets, dump payload and enable statistics
 ```bash
 sudo python McSniff.py eth0 -2 ETH -3 IPv6 -4 UDP -p -s
+```
+
+#### Capture only UDP (e.g. DNS) and dump payloads as hex
+```bash
+sudo python McSniff.py eth0 -2 ETH -3 IPv4 IPv6 -4 UDP -x
+```
+Payloads come out like `xxd`, offset | hex | ascii
+```
+0000  47 45 54 20 2f 20 48 54  54 50 2f 31 2e 31 0d 0a  |GET / HTTP/1.1..|
+0010  48 6f 73 74 3a 20 78 0d  0a 0d 0a                 |Host: x....|
+```
+
+## Development
+### Execute tests
+```bash
+python -m unittest discover tests -v
 ```
 
 ### Run whilst working on script

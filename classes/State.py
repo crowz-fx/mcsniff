@@ -5,6 +5,7 @@ from classes.constants.IPProtocols import IP_PROTOCOLS_REVERSED
 OPTIONS = {
     "interface": "eth0",
     "payload": False,
+    "hex": False,
     "statistics": False,
     "https": False,
     "level2": ["ETH", "ARP", "RARP"],

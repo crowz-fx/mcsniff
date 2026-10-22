@@ -2,8 +2,6 @@
 
 import struct
 
-from classes.utils.Formatters import format_payload
-
 
 class TCP:
     # 20 = src port (2), dest port (2), seq no (4), ack no (4),
@@ -47,7 +45,6 @@ class TCP:
 
         self.PARAMS = PACKET_UNPROCESSED_DATA[: self.PACKET_OPTIONS_LEN]
         self.RAW_PAYLOAD = PACKET_UNPROCESSED_DATA[self.PACKET_OPTIONS_LEN :]
-        self.PAYLOAD = format_payload(self.RAW_PAYLOAD)
         self.PAYLOAD_LEN = len(self.RAW_PAYLOAD)
 
     def process_packet(self, data: bytes):
