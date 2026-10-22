@@ -3,6 +3,7 @@
 import struct
 
 from classes.constants.EtherTypes import ETHER_TYPES
+from classes.constants.ARPOperationCodes import ARP_OPERATIONS
 from classes.utils.Formatters import format_ipv4, format_mac
 
 
@@ -110,7 +111,9 @@ class ARP:
         if self.PROTOCOL_TYPE in ETHER_TYPES:
             protocol_type_formatted += ":" + str(ETHER_TYPES[self.PROTOCOL_TYPE])
 
-        operation_formatted = "1:Request" if self.OPERATION == 1 else "2:Reply"
+        operation_formatted = str(self.OPERATION)
+        if self.OPERATION in ARP_OPERATIONS:
+            operation_formatted += ":" + ARP_OPERATIONS[self.OPERATION]
 
         return (
             f"|_{arp_type_formatted} > "

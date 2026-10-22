@@ -1,6 +1,6 @@
-import re
-from classes.State import OPTIONS
-from classes.constants.ColourChars import *
+import struct
+
+from classes.constants.ColourChars import BLUE, END, GREEN, YELLOW
 
 
 def format_mac(data: bytes) -> str:
@@ -16,40 +16,37 @@ def format_ipv4(data: bytes) -> str:
 def format_ipv6(data: bytes) -> str:
     # i know this is dodgy and i could have used a library, but where's the fun in that!
 
-    # 02x = left pad with 0's until min len of 2, lower case letters
-    initial_formatted = ":".join(format(b, "02x") for b in data)
+    # 8 groups of 16 bits, x = lower case hex with no leading 0's (RFC 5952)
+    groups = [format(group, "x") for group in struct.unpack("!8H", data)]
 
-    # very nasty way to process IPv6, truncating the largest :00 string to ::
-    largest_00_str = {"start": -1, "length": 3}
-    for match in re.compile(r"(:00)\1*").finditer(initial_formatted):
-        # if the match is longer than the standard :00 AND any previous check, pull values
-        if len(match.group()) > largest_00_str["length"]:
-            largest_00_str["start"] = match.start()
-            largest_00_str["length"] = len(match.group())
+    # only a run of 2+ zero groups gets shortened to ::, a lone 0 group stays as is
+    zero_run_start, zero_run_len = find_longest_zero_run(groups)
+    if zero_run_len < 2:
+        return ":".join(groups)
 
-    second_formatted = initial_formatted
-    # only if we did find a str of :00 larger than :00 i.e. :00:00
-    # shove a _ so we can ignore it till the end when we turn it into ::
-    if largest_00_str["length"] > 3:
-        second_formatted = (
-            initial_formatted[: largest_00_str["start"]]
-            + "_"
-            + initial_formatted[
-                largest_00_str["start"] + largest_00_str["length"] + 1 :
-            ]
-        )
+    before_run = ":".join(groups[:zero_run_start])
+    after_run = ":".join(groups[zero_run_start + zero_run_len :])
+    return before_run + "::" + after_run
 
-    # copy list so we can access index in it, can't modify second_formatted
-    # as would screw index and throw 'No Such Index' errors
-    formatted = list(second_formatted)
-    for idx, i in enumerate(second_formatted):
-        # check every 3rd char
-        if idx % 2 == 0 and idx != 0:
-            if i == ":" and second_formatted[idx - 1] != ":":
-                formatted[idx] = ""
 
-    # final replace if we did find a :00 long str to be replaced
-    return "".join(formatted).replace("_", "::")
+def find_longest_zero_run(groups: list[str]) -> tuple[int, int]:
+    # returns (start index, length), on a tie the first run wins as per RFC 5952
+    longest_start, longest_len = -1, 0
+    current_start, current_len = 0, 0
+
+    for idx, group in enumerate(groups):
+        if group != "0":
+            current_len = 0
+            continue
+
+        if current_len == 0:
+            current_start = idx
+        current_len += 1
+
+        if current_len > longest_len:
+            longest_start, longest_len = current_start, current_len
+
+    return longest_start, longest_len
 
 
 # printable ASCII plus newline/tab so text protocols like HTTP stay readable,
@@ -61,11 +58,10 @@ def format_payload(data: bytes) -> str:
 
 
 def print_payload(payload: str):
-    if OPTIONS["payload"]:
-        print_blue("|___PAYLOAD")
-        print_blue("       -------")
-        print_blue(payload)
-        print_blue("       -------")
+    print_blue("|___PAYLOAD")
+    print_blue("       -------")
+    print_blue(payload)
+    print_blue("       -------")
 
 
 def print_green(output: str):

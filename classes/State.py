@@ -23,11 +23,11 @@ STAT_COUNTS = {
     "malformed": 0,
 }
 # two updates = pull all new values without needing to update this
-STAT_COUNTS.update({key: 0 for key in ETHER_TYPES_REVERSED.keys()}),
-STAT_COUNTS.update({key: 0 for key in IP_PROTOCOLS_REVERSED.keys()}),
+STAT_COUNTS.update({key: 0 for key in ETHER_TYPES_REVERSED.keys()})
+STAT_COUNTS.update({key: 0 for key in IP_PROTOCOLS_REVERSED.keys()})
 
 
-def update_stats(key: str, value: any = 1):
+def update_stats(key: str, value: int | str = 1):
     # for counts, append
     if type(value) is int:
         STAT_COUNTS[key] += value

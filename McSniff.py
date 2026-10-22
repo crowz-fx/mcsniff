@@ -8,16 +8,22 @@ from datetime import datetime
 import socket, sys, signal, argparse
 
 from classes.EthernetFrame import EthernetFrame
-from classes.State import *
-from classes.constants.EtherTypes import *
-from classes.constants.IPProtocols import *
+from classes.State import OPTIONS, STAT_COUNTS, update_stats
+from classes.constants.EtherTypes import ETHER_TYPES, ETHER_TYPES_REVERSED
+from classes.constants.IPProtocols import IP_PROTOCOLS_REVERSED
 from classes.protocols.ARP import ARP
 from classes.protocols.ICMP import ICMP
 from classes.protocols.IPv4 import IPv4
 from classes.protocols.IPv6 import IPv6
 from classes.protocols.UDP import UDP
 from classes.protocols.TCP import TCP
-from classes.utils.Formatters import *
+from classes.utils.Formatters import (
+    format_mac,
+    print_blue,
+    print_green,
+    print_payload,
+    print_yellow,
+)
 
 
 # easy way to manage 'all the things to do when quitting'
@@ -44,7 +50,7 @@ def do_exit(exit_code: int = 0):
 
 
 # when we get a signal, handle accordingly
-def exit_handler(signum: signal.signal, frame):
+def exit_handler(signum: int, frame):
     print_yellow(f"\n[-] Handling SIGNAL=[{signal.Signals(signum).name}]...")
 
     # TODO - maybe consume and ignore some like SIGSTP?
@@ -57,8 +63,20 @@ def handle_time(classification: str):
     update_stats(f"{classification.lower()}_time", time_now)
 
 
+# encrypted traffic on 443 (HTTPS over TCP, QUIC over UDP) is unreadable noise,
+# so it's only dumped when explicitly asked for
+def should_dump_payload(
+    src_port: int | None = None, dest_port: int | None = None
+) -> bool:
+    if not OPTIONS["payload"]:
+        return False
+
+    is_encrypted_port = 443 in (src_port, dest_port)
+    return OPTIONS["https"] or not is_encrypted_port
+
+
 # handle all the magic in socket setup, and binding to interfaces
-def setup_socket(interface_name: str) -> socket:
+def setup_socket(interface_name: str) -> socket.socket:
     # create the actual socket connection and bind to an interface
     try:
         # dump out all interfaces
@@ -99,7 +117,6 @@ if __name__ == "__main__":
         "interface",
         type=str,
         help="interface to analyse, run 'ip link' to list",
-        default=OPTIONS["interface"],
     )
     args_parser.add_argument(
         "-p",
@@ -188,7 +205,7 @@ if __name__ == "__main__":
         # more than max packet size, even if eth frames are much lower
         # tuple = (bytes, return address), pull raw data
         try:
-            unprocessed_data, address = s.recvfrom(65565)
+            unprocessed_data, address = s.recvfrom(65535)
         except KeyboardInterrupt as error:
             # pass due to SIGINT being handled in signalsabove, this is
             # to supress the stacktrace for the KeyboardInterrupt
@@ -215,8 +232,19 @@ if __name__ == "__main__":
                         update_stats("IPv4")
                         print_green(ipv4)
 
+                        # only the first fragment carries the transport header, later
+                        # ones are the middle of a payload so can't be parsed alone
+                        if ipv4.OFFSET > 0:
+                            # offset is counted in 8 byte units
+                            offset_in_bytes = ipv4.OFFSET * 8
+                            print_blue(
+                                "|__Fragment > "
+                                + f"Offset=[{ipv4.OFFSET}:{offset_in_bytes} bytes] "
+                                + "no transport header, not parsed"
+                            )
+
                         # TCP
-                        if (
+                        elif (
                             ipv4.PROTOCOL == IP_PROTOCOLS_REVERSED["TCP"]
                             and "TCP" in OPTIONS["level4"]
                         ):
@@ -227,13 +255,11 @@ if __name__ == "__main__":
                             if tcp.PAYLOAD_LEN > 0:
                                 update_stats("segments")
 
-                                if OPTIONS["https"] or (
-                                    tcp.DEST_PORT != 443 and tcp.SRC_PORT != 443
-                                ):
+                                if should_dump_payload(tcp.SRC_PORT, tcp.DEST_PORT):
                                     print_payload(tcp.PAYLOAD)
 
                         # UDP
-                        if (
+                        elif (
                             ipv4.PROTOCOL == IP_PROTOCOLS_REVERSED["UDP"]
                             and "UDP" in OPTIONS["level4"]
                         ):
@@ -243,10 +269,12 @@ if __name__ == "__main__":
 
                             if udp.PAYLOAD_LEN > 0:
                                 update_stats("datagrams")
-                                print_payload(udp.PAYLOAD)
+
+                                if should_dump_payload(udp.SRC_PORT, udp.DEST_PORT):
+                                    print_payload(udp.PAYLOAD)
 
                         # ICMP
-                        if (
+                        elif (
                             ipv4.PROTOCOL == IP_PROTOCOLS_REVERSED["ICMP"]
                             and "ICMP" in OPTIONS["level3"]
                         ):
@@ -256,10 +284,12 @@ if __name__ == "__main__":
 
                             if icmp.PAYLOAD_LEN > 0:
                                 update_stats("datagrams")
-                                print_payload(icmp.PAYLOAD)
+
+                                if should_dump_payload():
+                                    print_payload(icmp.PAYLOAD)
 
                         # IGMP
-                        if (
+                        elif (
                             ipv4.PROTOCOL == IP_PROTOCOLS_REVERSED["IGMP"]
                             and "IGMP" in OPTIONS["level3"]
                         ):
@@ -322,9 +352,7 @@ if __name__ == "__main__":
                             if tcp.PAYLOAD_LEN > 0:
                                 update_stats("segments")
 
-                                if OPTIONS["https"] or (
-                                    tcp.DEST_PORT != 443 and tcp.SRC_PORT != 443
-                                ):
+                                if should_dump_payload(tcp.SRC_PORT, tcp.DEST_PORT):
                                     print_payload(tcp.PAYLOAD)
 
                         # UDP
@@ -338,7 +366,9 @@ if __name__ == "__main__":
 
                             if udp.PAYLOAD_LEN > 0:
                                 update_stats("datagrams")
-                                print_payload(udp.PAYLOAD)
+
+                                if should_dump_payload(udp.SRC_PORT, udp.DEST_PORT):
+                                    print_payload(udp.PAYLOAD)
             except ValueError as error:
                 # truncated/malformed data, skip rest of this frame and keep sniffing
                 print_yellow(f"[!] Skipped malformed frame: {error}")

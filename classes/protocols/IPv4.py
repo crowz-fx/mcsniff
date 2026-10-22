@@ -1,8 +1,8 @@
 # https://en.wikipedia.org/wiki/IPv4#Packet_structure
 
 import struct
-from classes.constants.IPProtocols import *
-from classes.utils.Formatters import *
+from classes.constants.IPProtocols import IP_PROTOCOLS
+from classes.utils.Formatters import format_ipv4
 
 
 class IPv4:
